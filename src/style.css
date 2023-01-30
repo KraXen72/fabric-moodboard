@@ -1,0 +1,56 @@
+body,
+html {
+	padding: 0;
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+}
+:root {
+	--dot-opacity: 22.5%; /* 22.5% */
+	--dot-color: hsla(0, 0%, 35%, var(--dot-opacity));
+	--dot-spacing: 16px; 
+	--dot-size: 2px;
+
+	--main-bg: #19191b;
+}
+
+#c {
+	border: var(--dot-size) solid var(--main-bg);
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+body {
+	overflow: hidden;
+}
+#canvasWrapper {
+	background-color: var(--main-bg);
+	background-image: radial-gradient(circle,
+			var(--dot-color) var(--dot-size),
+			transparent var(--dot-size));
+	background-size: var(--dot-spacing) var(--dot-spacing);
+	background-attachment: local;
+	background-position: 16px 16px;
+
+	width: 100%;
+	height: 100%;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
