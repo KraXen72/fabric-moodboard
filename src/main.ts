@@ -80,7 +80,6 @@ const rect = new fabric.Rect({
 rect.setControlsVisibility({
 	mtr: false
 })
-rect.contro
 
 // "add" rectangle onto canvas
 canvas.add(rect);
