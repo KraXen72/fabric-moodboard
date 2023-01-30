@@ -4,12 +4,9 @@ import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 import { GridSnapFabric } from './grid-snap-fabric';
 
-// 
-// https://github.com/Mstrdav/infinitegrid
-// https://github.com/naver/egjs-infinitegrid
-
 const GRID_SIZE = 32 //grid size in px
 if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
+
 const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	originX: 'left',
 	originY: 'top',
@@ -42,6 +39,14 @@ canvas.on('object:moving', function(options: IEvent<MouseEvent>) {
 		top: Math.round(options.target.top / GRID_SIZE) * GRID_SIZE
 	});
 });
+
+// canvas.on('object:modified', function(options: IEvent<MouseEvent>) {
+// 	console.log("target", options.target)
+// 	options.target.set({
+// 		left: Math.round(options.target.left / GRID_SIZE) * GRID_SIZE,
+// 		top: Math.round(options.target.top / GRID_SIZE) * GRID_SIZE
+// 	});
+// });
 
 canvas.on('mouse:down', function(this: any, opt: IEvent<MouseEvent>) {
   const evt = opt.e;
