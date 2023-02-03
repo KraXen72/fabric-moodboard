@@ -1,15 +1,22 @@
-export function debounce(func: Function, timeout = 300){
+// TODO: add these to roseboxlib
+export function debounce(this: any, func: Function, timeout = 150){
   let timer: number;
-	//@ts-ignore
-  return (...args) => {
+  return (...args: any[]) => {
     clearTimeout(timer);
-		//@ts-ignore
     timer = setTimeout(() => { func.apply(this, args); }, timeout);
   };
 }
 
-// function injectCSS(css) {
-//   const styleTag = document.createElement("style")
-//   styleTag.innerHTML = css
-//   document.head.appendChild(styleTag)
-// }
+/** assign all attributes in an object to provided element */
+export function assignAttributes(node: HTMLElement, attributes: Record<string, any>) {
+	Object.entries(attributes).forEach(([key, value]: [string, any]) => {
+		node.setAttribute(key, value)
+	});
+}
+
+/** assign all attributes in an object to provided svg */
+export function assignAttributesSVG(svgNode: SVGSVGElement, attributes: Record<string, any>) {
+	Object.entries(attributes).forEach(([key, value]: [string, any]) => {
+		svgNode.setAttributeNS(null, key, value)
+	});
+}

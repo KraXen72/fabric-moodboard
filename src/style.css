@@ -20,6 +20,7 @@ html {
 	padding: 0 !important;
 
 	background-color: var(--main-bg);
+	background-repeat: repeat;
 	background-image: radial-gradient(circle,
 			var(--dot-color) var(--dot-size),
 			transparent var(--dot-size));

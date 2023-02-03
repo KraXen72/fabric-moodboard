@@ -40,5 +40,5 @@ export class GridSnapFabric extends fabric.Canvas {
     active.scaleX = (active.scaleY >= 0 ? 1 : -1) * Math.max(Math.abs(active.scaleX), 0.001);
     active.scaleY = (active.scaleY >= 0 ? 1 : -1) * Math.max(Math.abs(active.scaleY), 0.001);
   }
-
 }
+export type GridSnapCanvas = fabric.Canvas & { gridGranularity: number }
