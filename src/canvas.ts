@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
-import { GridSnapCanvas } from "./grid-snap-canvas";
+import { GridSnapCanvas, snapGrid } from "./grid-snap-canvas";
+import { randomNumberBetween } from "./utils";
 
 export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number}
 export type viewportBorders = {
@@ -9,6 +10,14 @@ export type viewportBorders = {
 	bottom: fabric.Line,
 	left: fabric.Line
 } | null
+
+const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
+	originX: 'left',
+	originY: 'top',
+	lockRotation: true,
+	hasRotatingPoint: false
+}
+const DEFAULT_RECT_COLORS = ["f4f1de","e07a5f","3d405b","81b29a","f2cc8f"]
 
 //https://stackoverflow.com/questions/1248081/how-to-get-the-browser-viewport-dimensions#8876069
 const getViewportWidth = () => Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
@@ -26,6 +35,29 @@ function getViewportCorners() {
 		bl: [0, vh],
 		br: [vw, vh]
 	})
+}
+
+export interface ICanvasRectOptions extends Object { 
+	width?: number,
+	height?: number
+}
+
+export function addRect(canvas: fabricCanvasExtended, size: number, options?: ICanvasRectOptions) {
+	const backgroundColor = "#" + DEFAULT_RECT_COLORS[randomNumberBetween(0, DEFAULT_RECT_COLORS.length - 1)]
+	const rectOptions: fabric.IRectOptions = {
+		left: size,
+		top: size,
+		width: (options?.width ?? randomNumberBetween(2, 5)) * size,
+		height: (options?.width ?? randomNumberBetween(2, 5)) * size,
+		fill: backgroundColor,
+		backgroundColor: backgroundColor,
+		...DEFAULT_RECT_OPTS
+	}
+
+	const rect = new fabric.Rect(rectOptions);
+	rect.setControlsVisibility({ mtr: false })
+
+	canvas.add(rect)
 }
 
 export function resetViewportTransform(canvas: fabricCanvasExtended) {

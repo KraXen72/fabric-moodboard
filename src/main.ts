@@ -6,27 +6,18 @@ import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 import { debounce } from './utils';
 import { GridSnapFabric } from './grid-snap-canvas';
-import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended } from './canvas';
+import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, addRect } from './canvas';
 import { initToolbar } from './ui-toolbar';
 
 const GRID_SIZE = 32 //grid size in px
 if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
 
-const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
-	originX: 'left',
-	originY: 'top',
-	backgroundColor: "#529d8a",
-	fill: "#529d8a",
-	width: 3 * GRID_SIZE,
-	height: 2 * GRID_SIZE,
-	lockRotation: true,
-	hasRotatingPoint: false,
-}
-
 const canvas = new GridSnapFabric(document.getElementById("c") as HTMLCanvasElement)
+canvas.fireMiddleClick = true
+canvas.selectionKey = 'shiftKey'
+
 canvas.gridGranularity = GRID_SIZE
 canvas.cfg_smoothSnapping = false
-canvas.fireMiddleClick = true
 
 document.body.style.setProperty("--dot-spacing", `${GRID_SIZE}px`)
 initDotMatrix(canvas, GRID_SIZE) // initialize dotmatrix background through svg's
@@ -65,16 +56,25 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
   this.selection = true;
 });
 
-// create a rectangle object
-const rect = new fabric.Rect({
-	left: 0,
-	top: 0,
-	...DEFAULT_RECT_OPTS
-});
-rect.setControlsVisibility({ mtr: false })
+// remove controls from selections, because we don't want users to be able to resize them - it messes with the grid
+function selectionCallback(e: fabric.IEvent<MouseEvent>) {
+	if (!(e.selected.length !== 1 || canvas.getActiveObject().hasOwnProperty('_objects'))) return; 
+	if (!canvas.cfg_snapOnResize) return;
+	canvas.getActiveObject().hasControls = false
+}
+function selectionUpdatedCallback(e: fabric.IEvent<MouseEvent>) {
+	const act = canvas.getActiveObject() as fabric.ActiveSelection
+	if (act.type !== 'activeSelection') return;
+	if (!canvas.cfg_snapOnResize) return
 
-// "add" rectangle onto canvas
-canvas.add(rect);
+	canvas.discardActiveObject()
+	const selection = new fabric.ActiveSelection(act._objects, { hasControls: false, canvas: canvas })
+	canvas.setActiveObject(selection)
+	canvas.requestRenderAll()
+}
+
+canvas.on("selection:created", selectionCallback)
+canvas.on("selection:updated", selectionUpdatedCallback)
 
 initToolbar(canvas)
-
+addRect(canvas, GRID_SIZE)

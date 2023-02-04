@@ -20,3 +20,7 @@ export function assignAttributesSVG(svgNode: SVGSVGElement, attributes: Record<s
 		svgNode.setAttributeNS(null, key, value)
 	});
 }
+
+export function randomNumberBetween(min: number, max: number) {
+	return Math.floor(Math.random() * (max - min + 1) + min)
+}
