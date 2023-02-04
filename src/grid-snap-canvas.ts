@@ -1,6 +1,11 @@
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 
+/** calculate the nearest position that will follow grid */
+export function snapGrid(cord: number, gridGranularity: number): number {
+	return Math.round(cord / gridGranularity) * gridGranularity;
+}
+
 // resize grid snapping implementation credit to https://stackoverflow.com/a/70673823, rest is extended & modified by KraXen72
 export class GridSnapFabric extends fabric.Canvas {
   gridGranularity = 20;
@@ -17,14 +22,9 @@ export class GridSnapFabric extends fabric.Canvas {
 		this.on('object:modified', this.handleObjectModified.bind(this));
   }
 
-	/** calculate the nearest position that will follow grid */
-  private snapGrid(cord: number): number {
-    return Math.round(cord / this.gridGranularity) * this.gridGranularity;
-  }
-
 	/** given a fabric.Object, snap it to nearest grid position */
 	private snapObjectToGrid(target: fabric.Object) {
-		target.set({ left: this.snapGrid(target.left), top: this.snapGrid(target.top) });
+		target.set({ left: snapGrid(target.left, this.gridGranularity), top: snapGrid(target.top, this.gridGranularity) });
 	}
 
 	/** snap to grid on object scaling if cfg_snapOnResize is true */
@@ -36,21 +36,21 @@ export class GridSnapFabric extends fabric.Canvas {
 
     // X
     if (['tl', 'ml', 'bl'].indexOf(e.transform.corner) !== -1) {
-      const tl = this.snapGrid(active.left);
+      const tl = snapGrid(active.left, this.gridGranularity);
       active.scaleX = (width + active.left - tl) / (active.width + active.strokeWidth);
       active.left = tl;
     } else if (['tr', 'mr', 'br'].indexOf(e.transform.corner) !== -1) {
-      const tl = this.snapGrid(active.left + width);
+      const tl = snapGrid(active.left + width, this.gridGranularity);
       active.scaleX = (tl - active.left) / (active.width + active.strokeWidth);
     }
 
     // Y
     if (['tl', 'mt', 'tr'].indexOf(e.transform.corner) !== -1) {
-      const tt = this.snapGrid(active.top);
+      const tt = snapGrid(active.top, this.gridGranularity);
       active.scaleY = (height + active.top - tt) / (active.height + active.strokeWidth);
       active.top = tt;
     } else if (['bl', 'mb', 'br'].indexOf(e.transform.corner) !== -1) {
-      const tt = this.snapGrid(active.top + height);
+      const tt = snapGrid(active.top + height, this.gridGranularity);
       active.scaleY = (tt - active.top) / (active.height + active.strokeWidth);
     }
 
@@ -67,4 +67,4 @@ export class GridSnapFabric extends fabric.Canvas {
 		if (this.cfg_snapOnMove && this.cfg_smoothSnapping) this.snapObjectToGrid(e.target)
 	}
 }
-export type GridSnapCanvas = fabric.Canvas
+export type GridSnapCanvas = GridSnapFabric
