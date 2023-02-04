@@ -28,6 +28,14 @@ function getViewportCorners() {
 	})
 }
 
+export function resetViewportTransform(canvas: fabricCanvasExtended) {
+	const vpt = canvas.viewportTransform
+	vpt[4] = 0;
+	vpt[5] = 0;
+	canvas.setViewportTransform(vpt)
+	canvas.requestRenderAll();
+}
+
 /** resize canvas to viewport size */
 export function resizeCanvas(canvas: fabricCanvasExtended, vptBorders: viewportBorders = null) {
 	canvas.setWidth(getViewportWidth());
