@@ -1,9 +1,9 @@
 import './style.css'
-import { debounce } from './utils';
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
-import { GridSnapFabric } from './grid-snap-fabric';
-import { resizeCanvas, initDotMatrix, drawViewportBorders } from './canvas';
+import { debounce } from './utils';
+import { GridSnapFabric } from './grid-snap-canvas';
+import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended } from './canvas';
 
 const GRID_SIZE = 32 //grid size in px
 if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
@@ -22,16 +22,12 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	hasRotatingPoint: false,
 }
 
-/** canvas state: possibly migrate this to a store? */
-let cState = {
-	snapping: true,
-	smoothSnap: false
-}
 
 // create a wrapper around native canvas element (with id="c")
 // const _canvas = new fabric.Canvas('c');
 const canvas = new GridSnapFabric(document.getElementById("c") as HTMLCanvasElement)
 canvas.gridGranularity = GRID_SIZE
+canvas.cfg_smoothSnapping = false
 
 const viewportBorders = drawViewportBorders(canvas)
 
@@ -43,24 +39,8 @@ document.body.style.setProperty("--dot-spacing", `${GRID_SIZE}px`)
 // TODO rewrite params of this as opts object with interface
 initDotMatrix(canvas, GRID_SIZE) // initialize dotmatrix background through svg's
 
-/** snap event target to nearest grid cell */
-function snapToGrid(target: fabric.Object) {
-	target.set({
-		left: Math.round(target.left / GRID_SIZE) * GRID_SIZE,
-		top: Math.round(target.top / GRID_SIZE) * GRID_SIZE
-	});
-}
-
-canvas.on('object:moving', function (options: IEvent<MouseEvent>) { // snap to grid when moving (hard snap)
-	if (cState.snapping && !cState.smoothSnap) snapToGrid(options.target)
-});
-
-canvas.on('object:modified', function (options: IEvent<MouseEvent>) { // snap to grid upon letting go (soft snap)
-	if (cState.snapping && cState.smoothSnap) snapToGrid(options.target)
-});
-
 // todo optimize
-canvas.on('mouse:down', function(this: any, opt: IEvent<MouseEvent>) {
+canvas.on('mouse:down', function(this: fabricCanvasExtended, opt: IEvent<MouseEvent>) {
   const evt = opt.e;
   if (evt.ctrlKey === true) {
     this.isDragging = true;
@@ -69,7 +49,7 @@ canvas.on('mouse:down', function(this: any, opt: IEvent<MouseEvent>) {
     this.lastPosY = evt.clientY;
   }
 });
-canvas.on('mouse:move', function(this: any, opt: IEvent<MouseEvent>) {
+canvas.on('mouse:move', function(this: fabricCanvasExtended, opt: IEvent<MouseEvent>) {
   if (this.isDragging) {
     var e = opt.e;
     var vpt = this.viewportTransform;
@@ -80,7 +60,7 @@ canvas.on('mouse:move', function(this: any, opt: IEvent<MouseEvent>) {
     this.lastPosY = e.clientY;
   }
 });
-canvas.on('mouse:up', function(this: any) {
+canvas.on('mouse:up', function(this: fabricCanvasExtended) {
   // on mouse up we want to recalculate new interaction
   // for all objects, so we call setViewportTransform
   this.setViewportTransform(this.viewportTransform);

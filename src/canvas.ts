@@ -1,8 +1,8 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
-import { GridSnapCanvas } from "./grid-snap-fabric";
+import { GridSnapCanvas } from "./grid-snap-canvas";
 
-export type fabricCanvasExtended = GridSnapCanvas | fabric.Canvas
+export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number}
 export type viewportBorders = {
 	top: fabric.Line,
 	right: fabric.Line,
