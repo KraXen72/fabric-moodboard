@@ -22,25 +22,12 @@ export function initToolbar(canvas: GridSnapCanvas) {
 		index: 0
 	})
 
-	// const activeObjectShim = { width: 0, height: 0 }
-	// function updateActiveObjectShim() {
-	// 	const act = canvas.getActiveObject()
-	// 	Object.keys(activeObjectShim).forEach(key => {
-	// 		//@ts-ignore
-	// 		activeObjectShim[key] = act[key]
-	// 	})
-	// }
-
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnMove', {label: "on move"})
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnResize', {label: "on resize"})
 	snapToGridFolder.addInput(canvas, 'cfg_smoothSnapping', {label: "smooth"})
 
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
-
-	// updateActiveObjectShim(), ev.target.value = activeObjectShim.width
-	// topTabs.pages[1].addInput(activeObjectShim, 'width').on('change', (ev) => { canvas.getActiveObject().set({'width': ev.target.value, scaleX: 1, scaleY: 1}); canvas.requestRenderAll() })
-	// topTabs.pages[1].addInput(activeObjectShim, 'height').on('change', (ev) => { canvas.getActiveObject().set({'height': ev.target.value, scaleX: 1, scaleY: 1}); canvas.requestRenderAll() })
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))
 	
 	addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
