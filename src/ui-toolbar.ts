@@ -36,8 +36,4 @@ export function initToolbar(canvas: GridSnapCanvas) {
 		if (input.files.length === 0) return;
 		readAndAddImage(canvas, input.files[0]) 
 	})
-
-	// return activeObjectTab
-	// topTabs.pages[1].addButton({ title: 'Update Coords' }).on('click', () => { canvas.getActiveObject().set })
-
 }
