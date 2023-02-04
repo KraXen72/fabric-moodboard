@@ -1,6 +1,6 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
-import { GridSnapCanvas, snapGrid } from "./grid-snap-canvas";
+import { GridSnapCanvas } from "./grid-snap-canvas";
 import { randomNumberBetween } from "./utils";
 
 export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number}
@@ -15,7 +15,8 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	originX: 'left',
 	originY: 'top',
 	lockRotation: true,
-	hasRotatingPoint: false
+	hasRotatingPoint: false,
+	transparentCorners: false
 }
 const DEFAULT_RECT_COLORS = ["f4f1de","e07a5f","3d405b","81b29a","f2cc8f"]
 
@@ -35,29 +36,6 @@ function getViewportCorners() {
 		bl: [0, vh],
 		br: [vw, vh]
 	})
-}
-
-export interface ICanvasRectOptions extends Object { 
-	width?: number,
-	height?: number
-}
-
-export function addRect(canvas: fabricCanvasExtended, size: number, options?: ICanvasRectOptions) {
-	const backgroundColor = "#" + DEFAULT_RECT_COLORS[randomNumberBetween(0, DEFAULT_RECT_COLORS.length - 1)]
-	const rectOptions: fabric.IRectOptions = {
-		left: size,
-		top: size,
-		width: (options?.width ?? randomNumberBetween(2, 5)) * size,
-		height: (options?.width ?? randomNumberBetween(2, 5)) * size,
-		fill: backgroundColor,
-		backgroundColor: backgroundColor,
-		...DEFAULT_RECT_OPTS
-	}
-
-	const rect = new fabric.Rect(rectOptions);
-	rect.setControlsVisibility({ mtr: false })
-
-	canvas.add(rect)
 }
 
 export function resetViewportTransform(canvas: fabricCanvasExtended) {
@@ -136,5 +114,56 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 	const canvasBgCallback = () => setTimeout(() => canvas.requestRenderAll(), 0) 
 	//@ts-ignore
 	canvas.setBackgroundColor({source: inlineSVGString(tileSvgString)}, canvasBgCallback)
-	
+}
+
+
+// credit to https://codepen.io/G470/pen/PLbMLL, modified by KraXen72
+export function readAndAddImage(canvas: GridSnapCanvas, file: File) {
+	const fileReader = new FileReader();
+
+	fileReader.onload = () => {
+		var imgElement = new Image();
+		imgElement.src = fileReader.result as string;
+
+		imgElement.onload = () => {
+			const fabricImage = new fabric.Image(imgElement, { canvas: canvas, ...DEFAULT_RECT_OPTS });   
+			fabricImage.setControlsVisibility({ mtr: false })
+
+			const vw = getViewportWidth()
+			const vh = getViewportHeight()
+			if (vw > vh) { //landscape
+				fabricImage.scaleToWidth(vw - 200);
+				fabricImage.scaleToHeight(vh - 200);
+			} else { //portrait
+				fabricImage.scaleToHeight(vh - 200);
+				fabricImage.scaleToWidth(vw - 200);
+			}
+			canvas.add(fabricImage);
+			canvas.centerObject(fabricImage);
+			const rect = createRect(canvas.gridGranularity)
+		};
+	};
+	fileReader.readAsDataURL(file);
+};
+
+export interface ICanvasRectOptions extends Object { 
+	width?: number,
+	height?: number
+}
+
+export function createRect(size: number, options?: ICanvasRectOptions) {
+	const backgroundColor = "#" + DEFAULT_RECT_COLORS[randomNumberBetween(0, DEFAULT_RECT_COLORS.length - 1)]
+	const rectOptions: fabric.IRectOptions = {
+		left: size,
+		top: size,
+		width: (options?.width ?? randomNumberBetween(2, 5)) * size,
+		height: (options?.width ?? randomNumberBetween(2, 5)) * size,
+		fill: backgroundColor,
+		backgroundColor: backgroundColor,
+		...DEFAULT_RECT_OPTS
+	}
+
+	const rect = new fabric.Rect(rectOptions);
+	rect.setControlsVisibility({ mtr: false })
+	return rect
 }

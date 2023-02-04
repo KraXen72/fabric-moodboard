@@ -6,7 +6,7 @@ import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 import { debounce } from './utils';
 import { GridSnapFabric } from './grid-snap-canvas';
-import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, addRect } from './canvas';
+import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, createRect } from './canvas';
 import { initToolbar } from './ui-toolbar';
 
 const GRID_SIZE = 32 //grid size in px
@@ -63,18 +63,18 @@ function selectionCallback(e: fabric.IEvent<MouseEvent>) {
 	canvas.getActiveObject().hasControls = false
 }
 function selectionUpdatedCallback(e: fabric.IEvent<MouseEvent>) {
-	const act = canvas.getActiveObject() as fabric.ActiveSelection
-	if (act.type !== 'activeSelection') return;
+	if (canvas.getActiveObject().type !== 'activeSelection') return;
 	if (!canvas.cfg_snapOnResize) return
 
+	const selected = canvas.getActiveObjects()
+
 	canvas.discardActiveObject()
-	const selection = new fabric.ActiveSelection(act._objects, { hasControls: false, canvas: canvas })
+	const selection = new fabric.ActiveSelection(selected, { hasControls: false, canvas: canvas })
 	canvas.setActiveObject(selection)
 	canvas.requestRenderAll()
 }
 
 canvas.on("selection:created", selectionCallback)
 canvas.on("selection:updated", selectionUpdatedCallback)
-
 initToolbar(canvas)
-addRect(canvas, GRID_SIZE)
+canvas.add(createRect(GRID_SIZE))

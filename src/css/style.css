@@ -28,7 +28,7 @@ body { overflow: hidden; }
 	padding: 0 !important;
 }
 
-#toolbar {
+#toolbar, #filereader-wrap {
 	min-width: calc(256px - 16px);
 	position: fixed;
 	top: 8px;
@@ -43,6 +43,40 @@ body { overflow: hidden; }
 	column-gap: .5rem;
 	padding: 8px;
 	border-radius: 6px;
+}
+#filereader-wrap {
+	height: calc(8px + 44px + 8px);
+	top: calc(8px + 44px + 8px + 16px);
+	width: calc(256px - 16px);
+}
+
+#filereader {
+	width: 100%;
+	height: 100%;
+	border-radius: 6px;
+	box-sizing: border-box;
+	position: relative;
+	cursor: 'pointer';
+}
+#filereader::after {
+	pointer-events: none;
+	z-index: 2;
+	content: "Click here to pick image / drop here";
+	text-align: center;
+	padding-top: 20px;
+	color: #a3a5aa;
+	border: 2px dashed #a3a5aa;
+	border-radius: 6px;
+	display: block;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	box-sizing: border-box;
+	background-color: hsl(240, 4%, 20%);
 }
 
 #toolbar > button {
@@ -68,7 +102,7 @@ body { overflow: hidden; }
 }
 
 body .tp-dfwv {
-	top: 76px;
+	top: calc((8px + 44px + 8px + 16px) * 2 + 8px);
 }
 
 
