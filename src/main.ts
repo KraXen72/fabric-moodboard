@@ -62,9 +62,9 @@ function selectionCallback(e: fabric.IEvent<MouseEvent>) {
 	if (!canvas.cfg_snapOnResize) return;
 	canvas.getActiveObject().hasControls = false
 }
-function selectionUpdatedCallback(e: fabric.IEvent<MouseEvent>) {
+function selectionUpdatedCallback() {
 	if (canvas.getActiveObject().type !== 'activeSelection') return;
-	if (!canvas.cfg_snapOnResize) return
+	if (!canvas.cfg_snapOnResize) return;
 
 	const selected = canvas.getActiveObjects()
 

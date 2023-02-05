@@ -16,7 +16,9 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	originY: 'top',
 	lockRotation: true,
 	hasRotatingPoint: false,
-	transparentCorners: false
+	transparentCorners: false,
+	cornerStyle: 'circle',
+	cornerSize: 12
 }
 const DEFAULT_RECT_COLORS = ["f4f1de","e07a5f","3d405b","81b29a","f2cc8f"]
 
@@ -44,6 +46,59 @@ export function resetViewportTransform(canvas: fabricCanvasExtended) {
 	vpt[5] = 0;
 	canvas.setViewportTransform(vpt)
 	canvas.requestRenderAll();
+}
+
+export function removeActiveObjectOrSelection(canvas: fabricCanvasExtended) {
+	const activeObjLength = canvas.getActiveObjects().length
+	canvas.getActiveObjects().forEach(object => canvas.remove(object)) 
+	if (activeObjLength > 1) canvas.discardActiveObject()
+}
+
+type postProcessOptions = { cleanup: boolean, setDefaults: boolean }
+/** do some post / pre processing on an object. like set rounded corners, default, values, cleanup, etc... */
+function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { cleanup: false, setDefaults: false }) {
+	if (opts.setDefaults) object.set(DEFAULT_RECT_OPTS) //@ts-ignore-next-line
+	if (opts.cleanup) [0, 1, 2, 3, 4, 'globalCompositeOperation'].forEach((key: any) => delete object[key]) 
+	// TODO add option to re-scale object according to grid though GridSnapCanvas
+	object.setControlsVisibility({ mtr: false })
+	return object
+}
+
+export function duplicateSelection(canvas: GridSnapCanvas) {
+	const toClone = canvas.getActiveObjects()
+
+	const promises: Promise<fabric.Object>[] = toClone.map((object) => {
+		return new Promise((resolve) => {
+			// Only copy essential properties
+			const cloneProps = ['left', 'top', 'width', 'height', 'fill', 'backgroundColor', 'originX', 'originY', 'selectable']
+			const postProcessOpts = { cleanup: true, setDefaults: true }
+			object.clone((object: fabric.Object) => resolve(_postprocessObject(object, postProcessOpts)), cloneProps)
+		});
+	});
+
+	Promise.all(promises)
+		.then((clonedObjects: fabric.Object[]) => {
+			const group = new fabric.Group(clonedObjects);
+			group.set({ originX: 'left', originY: 'top' });
+			group.set({ left: 32, top: 32})
+			group.setCoords()
+
+			// Add the group to the canvas
+			canvas.add(group);
+			canvas.requestRenderAll()
+
+			// Split the group into individual objects and re-render the canvas
+			canvas.remove(group);
+			group.getObjects().forEach((obj: fabric.Object) => {
+				//@ts-ignore
+				obj.set({...DEFAULT_RECT_COLORS, ownMatrixCache: undefined, matrixCache: undefined, ownCaching: false})
+				obj.setCoords()
+				console.log("transforms", fabric.util.saveObjectTransform(obj)) // TODO restore transforms from old objects and .setCoords
+				canvas.add(obj)
+			});
+			canvas.requestRenderAll();
+		})
+		.catch((error) => console.error(error) );
 }
 
 /** resize canvas to viewport size */
@@ -126,8 +181,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File) {
 		imgElement.src = fileReader.result as string;
 
 		imgElement.onload = () => {
-			const fabricImage = new fabric.Image(imgElement, { canvas: canvas, ...DEFAULT_RECT_OPTS });   
-			fabricImage.setControlsVisibility({ mtr: false })
+			const fabricImage = createImage(imgElement)
 
 			const vw = getViewportWidth()
 			const vh = getViewportHeight()
@@ -140,7 +194,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File) {
 			}
 			canvas.add(fabricImage);
 			canvas.centerObject(fabricImage);
-			const rect = createRect(canvas.gridGranularity)
+			// const rect = createRect(canvas.gridGranularity)
 		};
 	};
 	fileReader.readAsDataURL(file);
@@ -151,6 +205,7 @@ export interface ICanvasRectOptions extends Object {
 	height?: number
 }
 
+// todo refactor these two
 export function createRect(size: number, options?: ICanvasRectOptions) {
 	const backgroundColor = "#" + DEFAULT_RECT_COLORS[randomNumberBetween(0, DEFAULT_RECT_COLORS.length - 1)]
 	const rectOptions: fabric.IRectOptions = {
@@ -162,8 +217,9 @@ export function createRect(size: number, options?: ICanvasRectOptions) {
 		backgroundColor: backgroundColor,
 		...DEFAULT_RECT_OPTS
 	}
-
-	const rect = new fabric.Rect(rectOptions);
-	rect.setControlsVisibility({ mtr: false })
-	return rect
+	return _postprocessObject(new fabric.Rect(rectOptions));
+}
+// todo remove this abstraction / de-extract, put back in place
+export function createImage(imgElement: HTMLImageElement | HTMLVideoElement) {
+	return _postprocessObject(new fabric.Image(imgElement, DEFAULT_RECT_OPTS));
 }
