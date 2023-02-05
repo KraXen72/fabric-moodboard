@@ -14,7 +14,7 @@ if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
 
 const canvas = new GridSnapFabric(document.getElementById("c") as HTMLCanvasElement)
 canvas.fireMiddleClick = true
-canvas.selectionKey = 'shiftKey'
+canvas.selectionKey = 'shiftKey'	
 
 canvas.gridGranularity = GRID_SIZE
 canvas.cfg_smoothSnapping = false
@@ -34,7 +34,7 @@ canvas.on('mouse:down', function(this: fabricCanvasExtended, opt: IEvent<MouseEv
     this.isDragging = true;
     this.selection = false;
     this.lastPosX = evt.clientX;
-    this.lastPosY = evt.clientY;
+    this.lastPosY = evt.clientY; 
   }
 });
 canvas.on('mouse:move', function(this: fabricCanvasExtended, opt: IEvent<MouseEvent>) {
