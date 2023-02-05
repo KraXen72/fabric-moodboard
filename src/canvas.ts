@@ -47,8 +47,9 @@ export function resetViewportTransform(canvas: fabricCanvasExtended) {
 	canvas.setViewportTransform(vpt)
 	canvas.requestRenderAll();
 }
-
-export function removeActiveObjectOrSelection(canvas: fabricCanvasExtended) {
+ 
+/** remove the current activeObject or even selection */
+export function removeActiveObject(canvas: fabricCanvasExtended) {
 	const activeObjLength = canvas.getActiveObjects().length
 	canvas.getActiveObjects().forEach(object => canvas.remove(object)) 
 	if (activeObjLength > 1) canvas.discardActiveObject()
