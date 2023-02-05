@@ -1,5 +1,5 @@
 import { GridSnapCanvas } from './grid-snap-canvas';
-import { createRect, duplicateSelection, readAndAddImage, removeActiveObjectOrSelection, resetViewportTransform } from './canvas';
+import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
 import { Pane } from 'tweakpane';
 
 const toolbar = document.getElementById("toolbar")
@@ -31,7 +31,7 @@ export function initToolbar(canvas: GridSnapCanvas) {
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))
 	
 	addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
-	addButton('delete', () => { removeActiveObjectOrSelection(canvas) }, 'Remove current object or selection')
+	addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
 	addButton('content_copy', () => { duplicateSelection(canvas) }, 'Duplicate current object or selection')
 	
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
