@@ -26,6 +26,18 @@ export function initToolbar(canvas: GridSnapCanvas) {
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnMove', {label: "on move"})
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnResize', {label: "on resize"})
 	snapToGridFolder.addInput(canvas, 'cfg_smoothSnapping', {label: "smooth"})
+	topTabs.pages[0].addSeparator()
+	topTabs.pages[0].addInput(canvas, 'cfg_pasteLocation', {
+		label: 'clone location',
+		options: {
+			'right of original': 'right',
+			'left of original': 'left',
+			'above original': 'above',
+			'below original': 'below'
+		}
+	})
+	topTabs.pages[0].addSeparator()
+	
 
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))

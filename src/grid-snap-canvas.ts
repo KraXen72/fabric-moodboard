@@ -23,6 +23,7 @@ export class GridSnapCanvas extends fabric.Canvas {
 	cfg_snapOnMove = true;
 	/** determines if objects should snap only when let go (true), or always when moved (false) */
 	cfg_smoothSnapping = false;
+	cfg_pasteLocation: 'right' | 'left' | 'above' | 'below' = 'right';
 
   constructor(canvas: HTMLCanvasElement, options?: fabric.ICanvasOptions) {
     super(canvas, options);
