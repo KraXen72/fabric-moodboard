@@ -12,6 +12,11 @@ import { initToolbar } from './ui-toolbar';
 const GRID_SIZE = 32 //grid size in px
 if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
 
+export const APP_SETTINGS: appSettings = {
+	pasteDirection: 'right',
+	allowResizeSelection: false
+}
+
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
 canvas.fireMiddleClick = true
 canvas.selectionKey = 'shiftKey'	
@@ -56,12 +61,20 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
   this.selection = true;
 });
 
-// remove controls from selections, because we don't want users to be able to resize them - it messes with the grid
+
+// remove most controls from selections, because we don't want users to be able to resize them - it messes with the grid
+const selectionControls = { bl: false, br: false, tl: false, tr: false, mtr: false}
 function selectionCallback(e: fabric.IEvent<MouseEvent>) {
 	if (!(e.selected.length !== 1 || canvas.getActiveObject().hasOwnProperty('_objects'))) return; 
 	if (!canvas.cfg_snapOnResize) return;
-	canvas.getActiveObject().hasControls = false
+
+	if (APP_SETTINGS.allowResizeSelection) {
+		canvas.getActiveObject().setControlsVisibility(selectionControls)
+	} else {
+		canvas.getActiveObject().hasControls = false
+	}
 }
+
 function selectionUpdatedCallback() {
 	if (canvas.getActiveObject().type !== 'activeSelection') return;
 	if (!canvas.cfg_snapOnResize) return;
@@ -69,12 +82,17 @@ function selectionUpdatedCallback() {
 	const selected = canvas.getActiveObjects()
 
 	canvas.discardActiveObject()
-	const selection = new fabric.ActiveSelection(selected, { hasControls: false, canvas: canvas })
+	const selection = new fabric.ActiveSelection(selected, { canvas: canvas })
+	if (APP_SETTINGS.allowResizeSelection) {
+		selection.setControlsVisibility(selectionControls)
+	} else {
+		selection.hasControls = false
+	}
 	canvas.setActiveObject(selection)
 	canvas.requestRenderAll()
 }
 
 canvas.on("selection:created", selectionCallback)
 canvas.on("selection:updated", selectionUpdatedCallback)
-initToolbar(canvas)
+initToolbar(canvas, APP_SETTINGS)
 canvas.add(createRect(GRID_SIZE, { canvas }))

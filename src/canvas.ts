@@ -66,7 +66,69 @@ function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { 
 	return object
 }
 
-export function duplicateSelection(canvas: GridSnapCanvas) {
+type selectionShimOrTwin = { top: number, left: number, width: number, height: number, [key: string]: any }
+
+/** 
+ * calculate the top & left depeding on selectionShim, object & paste direction
+ * @param pastePosition the direction in which the new thing is supposed to be pasted
+ * @param twin twin or selectionShim
+ * @param obj the current object
+ * @param gridGranularity the size of 1 grid cell
+ * @param selection if we are dealing with a selection or not.
+ */
+function _newPastePosition(
+	pastePosition: appSettings['pasteDirection'],
+	twin: selectionShimOrTwin,
+	obj: fabric.Object,
+	gridGranularity: number,
+	selection: boolean
+) {
+	if (!selection) {
+		switch (pastePosition) {
+			case "above":
+				return { top: twin.top - twin.height - gridGranularity, left: twin.left }
+			case "below":
+				return { top: twin.top + twin.height + gridGranularity, left: twin.left }
+			case "left":
+				return { top: twin.top, left: twin.left - twin.width - gridGranularity }
+			case "right":
+			default:
+				return { top: twin.top, left: twin.left + twin.width + gridGranularity }
+		}
+	} else {
+		// in this case the object's top is usually negative = relative to selection
+		// and the selection is positive = real position, but also center based & not topleft
+		// so we have to account & normalize both
+		const halfW = Math.round(twin.width / 2)
+		const halfH =  Math.round(twin.height / 2)
+		switch (pastePosition) {
+			case "above":
+				return {
+					top: obj.top + twin.top + halfH - twin.height - gridGranularity,
+					left: obj.left + twin.left + halfW
+				}
+				break;
+			case "below":
+				return {
+					top: obj.top + twin.top + halfH + twin.height + gridGranularity,
+					left: obj.left + twin.left + halfW
+				}
+			case "left":
+				return {
+					top: obj.top + twin.top + halfH,
+					left: obj.left + twin.left - twin.width + halfW - gridGranularity
+				}
+			case "right":
+			default:
+				return {
+					top: obj.top + twin.top + halfH,
+					left: obj.left + twin.left + twin.width + halfW + gridGranularity
+				}
+		}
+	}
+}
+
+export function duplicateSelection(canvas: GridSnapCanvas, appSettings: appSettings) {
 	const toClone = canvas.getActiveObjects()
 	if (toClone.length === 0) return;
 
@@ -85,10 +147,7 @@ export function duplicateSelection(canvas: GridSnapCanvas) {
 				const twin = toClone[0]
 				const clone = clonedObjects[0]
 				canvas.add(clone)
-				clone.set({
-					top: twin.top,
-					left: twin.left + twin.width + canvas.gridGranularity
-				})
+				clone.set(_newPastePosition(appSettings.pasteDirection, twin as selectionShimOrTwin, clone, canvas.gridGranularity, false))
 				clone.setCoords()
 				try { canvas.discardActiveObject() } catch (e) { }
 				canvas.setActiveObject(clone)
@@ -103,10 +162,7 @@ export function duplicateSelection(canvas: GridSnapCanvas) {
 
 				clonedObjects.forEach((obj: fabric.Object) => {
 					canvas.add(obj)
-					obj.set({
-						top: obj.top + selectionShim.top + Math.round(selectionShim.height / 2),
-						left: obj.left + selectionShim.left + selectionShim.width + Math.round(selectionShim.width / 2) + canvas.gridGranularity,
-					})
+					obj.set(_newPastePosition(appSettings.pasteDirection, selectionShim, obj, canvas.gridGranularity, true))
 					obj.setCoords()
 				});
 				try { canvas.discardActiveObject() } catch (e) { }
@@ -123,7 +179,6 @@ export function resizeCanvas(canvas: fabricCanvasExtended, vptBorders: viewportB
 	canvas.setHeight(getViewportHeight());
 
 	if (vptBorders !== null) {
-		console.log(vptBorders)
 		const v = getViewportCorners()
 
 		vptBorders.top.set({x1: v.tl[0], y1: v.tl[1], x2: v.tr[0], y2: v.tr[1]})
