@@ -61,17 +61,14 @@ type postProcessOptions = { cleanup: boolean, setDefaults: boolean }
 /** do some post / pre processing on an object. like set rounded corners, default, values, cleanup, etc... */
 function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { cleanup: false, setDefaults: false }) {
 	if (opts.setDefaults) object.set(DEFAULT_RECT_OPTS) //@ts-ignore-next-line, ts doesen't like untyped deleting of props from objects
-	if (opts.cleanup) [0, 1, 2, 3, 4, 'globalCompositeOperation'].forEach((key: any) => delete object[key]) 
-	// if (typeof object.canvas !== "undefined" && 'ensureObjectScaleSnapped' in object.canvas) {
-	// 	const canvas: any = object.canvas
-	// 	canvas.ensureObjectScaleSnapped(object)
-	// }
+	if (opts.cleanup) [0, 1, 2, 3, 4, 'globalCompositeOperation', 'version'].forEach((key: any) => delete object[key]) 
 	object.setControlsVisibility({ mtr: false })
 	return object
 }
 
 export function duplicateSelection(canvas: GridSnapCanvas) {
 	const toClone = canvas.getActiveObjects()
+	if (toClone.length === 0) return;
 
 	const promises: Promise<fabric.Object>[] = toClone.map((object) => {
 		return new Promise((resolve) => {
@@ -84,27 +81,40 @@ export function duplicateSelection(canvas: GridSnapCanvas) {
 
 	Promise.all(promises)
 		.then((clonedObjects: fabric.Object[]) => {
-			const group = new fabric.Group(clonedObjects);
-			group.set({ originX: 'left', originY: 'top' });
-			group.set({ left: 32, top: 32})
-			group.setCoords()
+			if (clonedObjects.length === 1) {
+				const twin = toClone[0]
+				const clone = clonedObjects[0]
+				canvas.add(clone)
+				clone.set({
+					top: twin.top,
+					left: twin.left + twin.width + canvas.gridGranularity
+				})
+				clone.setCoords()
+				try { canvas.discardActiveObject() } catch (e) { }
+				canvas.setActiveObject(clone)
+			} else {
+				console.log("original", toClone, "new", clonedObjects)
 
-			// Add the group to the canvas
-			canvas.add(group);
-			canvas.requestRenderAll()
+				const active = canvas.getActiveObject()
+				active.set({ originX: 'left', originY: 'top' })
+				active.setCoords()
+				const { top, left, width, height } = active;
+				const selectionShim = { top, left, width, height };
 
-			// Split the group into individual objects and re-render the canvas
-			canvas.remove(group);
-			group.getObjects().forEach((obj: fabric.Object) => {
-				//@ts-ignore cloned objects have an ownCaching boolean. tried to union it but didn't work
-				obj.set({...DEFAULT_RECT_COLORS, ownMatrixCache: undefined, matrixCache: undefined, ownCaching: false})
-				obj.setCoords()
-				console.log("transforms", fabric.util.saveObjectTransform(obj)) // TODO restore transforms from old objects and .setCoords
-				canvas.add(obj)
-			});
+				clonedObjects.forEach((obj: fabric.Object) => {
+					canvas.add(obj)
+					obj.set({
+						top: obj.top + selectionShim.top + Math.round(selectionShim.height / 2),
+						left: obj.left + selectionShim.left + selectionShim.width + Math.round(selectionShim.width / 2) + canvas.gridGranularity,
+					})
+					obj.setCoords()
+				});
+				try { canvas.discardActiveObject() } catch (e) { }
+				canvas.setActiveObject(new fabric.ActiveSelection(clonedObjects, { canvas }))
+			}
 			canvas.requestRenderAll();
 		})
-		.catch((error) => console.error(error) );
+		.catch((error) => console.error(error));
 }
 
 /** resize canvas to viewport size */
