@@ -5,14 +5,14 @@ import './css/style.css'
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 import { debounce } from './utils';
-import { GridSnapFabric } from './grid-snap-canvas';
+import { GridSnapCanvas } from './grid-snap-canvas';
 import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, createRect } from './canvas';
 import { initToolbar } from './ui-toolbar';
 
 const GRID_SIZE = 32 //grid size in px
 if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
 
-const canvas = new GridSnapFabric(document.getElementById("c") as HTMLCanvasElement)
+const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
 canvas.fireMiddleClick = true
 canvas.selectionKey = 'shiftKey'	
 
@@ -30,7 +30,7 @@ window.addEventListener('resize', debounce(() => { resizeCanvas(canvas, viewport
 // panning of canvas with middleclick or ctrl+leftclick
 canvas.on('mouse:down', function(this: fabricCanvasExtended, opt: IEvent<MouseEvent>) {
   const evt = opt.e;
-  if ((evt.button === 0 && evt.ctrlKey) || (evt.button === 1 && !evt.ctrlKey)) {
+  if ((evt.button === 0 && evt.ctrlKey) || evt.button === 1) {
     this.isDragging = true;
     this.selection = false;
     this.lastPosX = evt.clientX;
@@ -77,4 +77,4 @@ function selectionUpdatedCallback() {
 canvas.on("selection:created", selectionCallback)
 canvas.on("selection:updated", selectionUpdatedCallback)
 initToolbar(canvas)
-canvas.add(createRect(GRID_SIZE))
+canvas.add(createRect(GRID_SIZE, { canvas }))

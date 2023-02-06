@@ -17,6 +17,7 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	lockRotation: true,
 	hasRotatingPoint: false,
 	transparentCorners: false,
+	strokeWidth: 0,
 	cornerStyle: 'circle',
 	cornerSize: 12
 }
@@ -56,11 +57,15 @@ export function removeActiveObject(canvas: fabricCanvasExtended) {
 }
 
 type postProcessOptions = { cleanup: boolean, setDefaults: boolean }
+
 /** do some post / pre processing on an object. like set rounded corners, default, values, cleanup, etc... */
 function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { cleanup: false, setDefaults: false }) {
-	if (opts.setDefaults) object.set(DEFAULT_RECT_OPTS) //@ts-ignore-next-line
+	if (opts.setDefaults) object.set(DEFAULT_RECT_OPTS) //@ts-ignore-next-line, ts doesen't like untyped deleting of props from objects
 	if (opts.cleanup) [0, 1, 2, 3, 4, 'globalCompositeOperation'].forEach((key: any) => delete object[key]) 
-	// TODO add option to re-scale object according to grid though GridSnapCanvas
+	// if (typeof object.canvas !== "undefined" && 'ensureObjectScaleSnapped' in object.canvas) {
+	// 	const canvas: any = object.canvas
+	// 	canvas.ensureObjectScaleSnapped(object)
+	// }
 	object.setControlsVisibility({ mtr: false })
 	return object
 }
@@ -91,7 +96,7 @@ export function duplicateSelection(canvas: GridSnapCanvas) {
 			// Split the group into individual objects and re-render the canvas
 			canvas.remove(group);
 			group.getObjects().forEach((obj: fabric.Object) => {
-				//@ts-ignore
+				//@ts-ignore cloned objects have an ownCaching boolean. tried to union it but didn't work
 				obj.set({...DEFAULT_RECT_COLORS, ownMatrixCache: undefined, matrixCache: undefined, ownCaching: false})
 				obj.setCoords()
 				console.log("transforms", fabric.util.saveObjectTransform(obj)) // TODO restore transforms from old objects and .setCoords
@@ -168,8 +173,8 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 	//() => ({repeat: "repeat"}), {repeat: "repeat"} or () => {} works too
 	// but it's best to force the canvas to render after setting of the bg color
 	const canvasBgCallback = () => setTimeout(() => canvas.requestRenderAll(), 0) 
-	//@ts-ignore
-	canvas.setBackgroundColor({source: inlineSVGString(tileSvgString)}, canvasBgCallback)
+	//@ts-ignore, setBackgroundColor's not supposed to work but it's the only way
+	canvas.setBackgroundColor({ source: inlineSVGString(tileSvgString) }, canvasBgCallback)
 }
 
 
@@ -201,26 +206,33 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File) {
 	fileReader.readAsDataURL(file);
 };
 
-export interface ICanvasRectOptions extends Object { 
+/** have to be assignable to image and rect */
+interface newObjectSharedOptions {
+	canvas?: GridSnapCanvas
+}
+
+interface newRectOptions extends newObjectSharedOptions { 
 	width?: number,
 	height?: number
 }
 
 // todo refactor these two
-export function createRect(size: number, options?: ICanvasRectOptions) {
+export function createRect(size: number, options?: newRectOptions) {
 	const backgroundColor = "#" + DEFAULT_RECT_COLORS[randomNumberBetween(0, DEFAULT_RECT_COLORS.length - 1)]
 	const rectOptions: fabric.IRectOptions = {
+		...DEFAULT_RECT_OPTS,
 		left: size,
 		top: size,
 		width: (options?.width ?? randomNumberBetween(2, 5)) * size,
 		height: (options?.width ?? randomNumberBetween(2, 5)) * size,
 		fill: backgroundColor,
 		backgroundColor: backgroundColor,
-		...DEFAULT_RECT_OPTS
 	}
+	if (options?.canvas) rectOptions.canvas = options.canvas
+
 	return _postprocessObject(new fabric.Rect(rectOptions));
 }
 // todo remove this abstraction / de-extract, put back in place
-export function createImage(imgElement: HTMLImageElement | HTMLVideoElement) {
-	return _postprocessObject(new fabric.Image(imgElement, DEFAULT_RECT_OPTS));
+export function createImage(imgElement: HTMLImageElement | HTMLVideoElement, options?: newObjectSharedOptions) {
+	return _postprocessObject(new fabric.Image(imgElement, { ...DEFAULT_RECT_OPTS, ...options }));
 }

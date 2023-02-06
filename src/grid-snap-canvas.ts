@@ -1,3 +1,4 @@
+// import { RecursivePartial } from './utils';
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 
@@ -6,8 +7,16 @@ export function snapGrid(cord: number, gridGranularity: number): number {
 	return Math.round(cord / gridGranularity) * gridGranularity;
 }
 
+type scalingEvent = {
+	transform: {
+		corner: string
+		[key: string]: any
+	}
+	[key: string]: any
+}
+
 // resize grid snapping implementation credit to https://stackoverflow.com/a/70673823, rest is extended & modified by KraXen72
-export class GridSnapFabric extends fabric.Canvas {
+export class GridSnapCanvas extends fabric.Canvas {
   gridGranularity = 20;
 
 	cfg_snapOnResize = true;
@@ -17,6 +26,7 @@ export class GridSnapFabric extends fabric.Canvas {
 
   constructor(canvas: HTMLCanvasElement, options?: fabric.ICanvasOptions) {
     super(canvas, options);
+		//@ts-ignore because i want to keep 'active' prameter undefined by default. i'm handling it in the function
     this.on('object:scaling', this.handleObjectScaling.bind(this));
 		this.on('object:moving', this.handleObjectMoving.bind(this));
 		this.on('object:modified', this.handleObjectModified.bind(this));
@@ -27,11 +37,14 @@ export class GridSnapFabric extends fabric.Canvas {
 		target.set({ left: snapGrid(target.left, this.gridGranularity), top: snapGrid(target.top, this.gridGranularity) });
 	}
 
-	/** snap to grid on object scaling if cfg_snapOnResize is true */
-  private handleObjectScaling(e: fabric.IEvent) {
-		if (!this.cfg_snapOnResize) return
-
-    const active = this.getActiveObject();
+	/** 
+	 * snap to grid on object scaling if cfg_snapOnResize is true 
+	 * @param e fabric event for transform
+	 * @param [active] substitute the object this is applied to. default is activeObject
+	*/
+  private handleObjectScaling(e: scalingEvent, active: fabric.Object) {
+		if (!this.cfg_snapOnResize) return;
+		if (typeof active === "undefined") active = this.getActiveObject()
     const [width, height] = [active.getScaledWidth(), active.getScaledHeight()];
 
     // X
@@ -66,5 +79,11 @@ export class GridSnapFabric extends fabric.Canvas {
 	private handleObjectModified(e: IEvent<MouseEvent>) {
 		if (this.cfg_snapOnMove && this.cfg_smoothSnapping) this.snapObjectToGrid(e.target)
 	}
+
+	// /** ensures the object's scale precisely matches the  */
+	// ensureObjectScaleSnapped(object: fabric.Object) {
+	// 	if (this.cfg_snapOnMove) this.snapObjectToGrid(object) // snap if we snap on move
+	// 	// @ts-ignore
+	// 	if (this.cfg_snapOnResize) this.handleObjectScaling({ transform: { corner: 'bl' } }, object) // simulate a bottom-left resize
+	// }
 }
-export type GridSnapCanvas = GridSnapFabric
