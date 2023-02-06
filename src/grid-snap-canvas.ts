@@ -7,14 +7,6 @@ export function snapGrid(cord: number, gridGranularity: number): number {
 	return Math.round(cord / gridGranularity) * gridGranularity;
 }
 
-type scalingEvent = {
-	transform: {
-		corner: string
-		[key: string]: any
-	}
-	[key: string]: any
-}
-
 // resize grid snapping implementation credit to https://stackoverflow.com/a/70673823, rest is extended & modified by KraXen72
 export class GridSnapCanvas extends fabric.Canvas {
   gridGranularity = 20;
