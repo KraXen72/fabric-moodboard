@@ -2,6 +2,7 @@ import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
 import { setup } from "fabricjs-object-fit";
 import { GridSnapCanvas } from "./grid-snap-canvas";
+import { clearFileReader } from "./ui-toolbar";
 import { randomNumberBetween } from "./utils";
 
 export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number}
@@ -284,6 +285,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 				height: Math.round(container.height * container.scaleY)
 			}})
 			canvas.setActiveObject(container)
+			clearFileReader()
 		};
 	};
 	fileReader.readAsDataURL(file);
