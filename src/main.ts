@@ -13,7 +13,8 @@ if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
 
 export const APP_SETTINGS: appSettings = {
 	pasteDirection: 'right',
-	allowResizeSelection: false
+	allowResizeSelection: false,
+	defaultFitMode: 'cover'
 }
 
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
