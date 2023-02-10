@@ -69,7 +69,7 @@ function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { 
 	return object
 }
 
-type selectionShimOrTwin = { top: number, left: number, width: number, height: number, [key: string]: any }
+type selectionShimOrTwin = { top: number, left: number, width: number, height: number, scaleX: number, scaleY: number, [key: string]: any }
 
 /** 
  * calculate the top & left depeding on selectionShim, object & paste direction
@@ -87,16 +87,19 @@ function _newPastePosition(
 	selection: boolean
 ) {
 	if (!selection) {
+		// single objects usually have a width, height + scaleX, scaleY
+		const tw_w = twin.width * twin.scaleX
+		const tw_h = twin.height * twin.scaleY
 		switch (pastePosition) {
 			case "above":
-				return { top: twin.top - twin.height - gridGranularity, left: twin.left }
+				return { top: twin.top - tw_h - gridGranularity, left: twin.left }
 			case "below":
-				return { top: twin.top + twin.height + gridGranularity, left: twin.left }
+				return { top: twin.top + tw_h + gridGranularity, left: twin.left }
 			case "left":
-				return { top: twin.top, left: twin.left - twin.width - gridGranularity }
+				return { top: twin.top, left: twin.left - tw_w - gridGranularity }
 			case "right":
 			default:
-				return { top: twin.top, left: twin.left + twin.width + gridGranularity }
+				return { top: twin.top, left: twin.left + tw_w + gridGranularity }
 		}
 	} else {
 		// in this case the object's top is usually negative = relative to selection
@@ -161,7 +164,7 @@ export function duplicateSelection(canvas: GridSnapCanvas, appSettings: appSetti
 				active.set({ originX: 'left', originY: 'top' })
 				active.setCoords()
 				const { top, left, width, height } = active;
-				const selectionShim = { top, left, width, height };
+				const selectionShim = { top, left, width, height, scaleX: 1, scaleY: 1 };
 
 				clonedObjects.forEach((obj: fabric.Object) => {
 					canvas.add(obj)
