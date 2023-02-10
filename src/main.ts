@@ -65,13 +65,15 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
 // remove most controls from selections, because we don't want users to be able to resize them - it messes with the grid
 const selectionControls = { bl: false, br: false, tl: false, tr: false, mtr: false}
 function selectionCallback(e: fabric.IEvent<MouseEvent>) {
-	if (!(e.selected.length !== 1 || canvas.getActiveObject().hasOwnProperty('_objects'))) return; 
+	const active = canvas.getActiveObject()
+	if (!(e.selected.length !== 1 || active.hasOwnProperty('_objects'))) return;
+	if (active.type === "objectFit" && e.selected.length === 1) return;
 	if (!canvas.cfg_snapOnResize) return;
 
 	if (APP_SETTINGS.allowResizeSelection) {
-		canvas.getActiveObject().setControlsVisibility(selectionControls)
+		active.setControlsVisibility(selectionControls)
 	} else {
-		canvas.getActiveObject().hasControls = false
+		active.hasControls = false
 	}
 }
 
@@ -93,7 +95,7 @@ function selectionUpdatedCallback() {
 }
 
 // TODO reneable selection
-// canvas.on("selection:created", selectionCallback)
-// canvas.on("selection:updated", selectionUpdatedCallback)
+canvas.on("selection:created", selectionCallback)
+canvas.on("selection:updated", selectionUpdatedCallback)
 initToolbar(canvas, APP_SETTINGS)
 canvas.add(createRect(GRID_SIZE, { canvas }))
