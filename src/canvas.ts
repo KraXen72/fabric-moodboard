@@ -271,8 +271,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 				fabricImage.scaleToHeight(imageSize);
 				fabricImage.scaleToWidth(imageSize);
 			}
-			const container = new ObjectFit(fabricImage, { mode })
-			container.set(DEFAULT_RECT_OPTS)
+			const container = _postprocessObject(new ObjectFit(fabricImage, { mode }), { cleanup: false, setDefaults: true })
 			
 			canvas.add(container);
 			canvas.centerObject(container);
