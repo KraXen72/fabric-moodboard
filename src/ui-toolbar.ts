@@ -31,9 +31,9 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		], index: 0
 	})
 	const fitOptions = { cover: FitMode.COVER, contain: FitMode.CONTAIN, 'default (stretch)': FitMode.FILL }
-	let activeObjControls: BladeApi<any>[] = []
-	let _activeObj: fabric.Object | IObjectFit | { mode: string } = { mode: appSettings.defaultFitMode }
-
+	let activeObjControls: BladeApi<any>[] = [] /** reference so they can be disposed of later */
+	
+	// settings - tab 0
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnMove', {label: "on move"})
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnResize', {label: "on resize"})
@@ -58,8 +58,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
 
-	// current object
-
+	// current object - tab 1
 	function scaleToAspectRatio(adjust: 'width' | 'height') {
 		const _active = canvas.getActiveObject() as IObjectFitFull
 		if (adjust === 'width') {
@@ -74,19 +73,19 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	}
 
 	function refreshActiveObjectControls() {
-		_activeObj = canvas.getActiveObject() 
+		let _activeObj: fabric.Object | IObjectFit | { mode: string } = canvas.getActiveObject()
 		const isObjFit = _activeObj?.type === 'objectFit' ? true : false
 
 		activeObjControls.forEach(control => control.dispose())
 		activePartSeparator.hidden = !isObjFit
-		if (isObjFit) setUpActiveObjectControls()
+		if (isObjFit) setUpActiveObjectControls(_activeObj as IObjectFitFull)
 		pane.refresh();
 	}
 
 	/** set up tweakpane controls for the current active object */
-	function setUpActiveObjectControls() {
+	function setUpActiveObjectControls(active: IObjectFitFull) {
 		const activeImageFolder = topTabs.pages[1].addFolder({ title: "Selected Image" })
-		activeImageFolder.addInput((_activeObj as IObjectFitFull), 'mode', {
+		activeImageFolder.addInput(active, 'mode', {
 			label: "fitMode",
 			options: fitOptions
 		}).on("change", (ev) => {
@@ -117,7 +116,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 
 	topTabs.on('select', (ev) => { if (ev.index === 1) refreshActiveObjectControls() })
 
-	// big buttons
+	// big buttons' toolbar
 	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
 	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
@@ -129,7 +128,5 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		if (input.files.length === 0) return;
 		readAndAddImage(canvas, input.files[0], appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
 	})
-
-	refreshActiveObjectControls()
 }
 
