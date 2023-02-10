@@ -1,3 +1,5 @@
+import { IObjectFit } from "fabricjs-object-fit"
+
 declare global {
 	interface appSettings {
 		pasteDirection: 'right' | 'left' | 'above' | 'below',
@@ -11,6 +13,10 @@ declare global {
 		}
 		[key: string]: any
 	}
+
+	type coverContain = 'cover' | 'contain'
+
+	type IObjectFitFull = IObjectFit & { handleRecomputeOnScaled?: Function, handleRecomputeOnScaling: Function }
 }
 
 export {};

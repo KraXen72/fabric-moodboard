@@ -1,5 +1,6 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
+import { setup } from "fabricjs-object-fit";
 import { GridSnapCanvas } from "./grid-snap-canvas";
 import { randomNumberBetween } from "./utils";
 
@@ -22,6 +23,8 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	cornerSize: 12
 }
 const DEFAULT_RECT_COLORS = ["f4f1de","e07a5f","3d405b","81b29a","f2cc8f"]
+
+const { ObjectFit } = setup(fabric)
 
 //https://stackoverflow.com/questions/1248081/how-to-get-the-browser-viewport-dimensions#8876069
 const getViewportWidth = () => Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
@@ -243,8 +246,11 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 }
 
 
-// credit to https://codepen.io/G470/pen/PLbMLL, modified by KraXen72
-export function readAndAddImage(canvas: GridSnapCanvas, file: File) {
+
+// credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
+// credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
+// both further modified by KraXen72
+export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverContain = "cover") {
 	const fileReader = new FileReader();
 
 	fileReader.onload = () => {
@@ -252,20 +258,25 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File) {
 		imgElement.src = fileReader.result as string;
 
 		imgElement.onload = () => {
-			const fabricImage = createImage(imgElement)
-
 			const vw = getViewportWidth()
 			const vh = getViewportHeight()
+			const relativeSize = canvas.gridGranularity * 5
+			// let width = vw - relativeSize;
+			// let height = vh - relativeSize;
+
+			const fabricImage = createImage(imgElement)
 			if (vw > vh) { //landscape
-				fabricImage.scaleToWidth(vw - 200);
-				fabricImage.scaleToHeight(vh - 200);
+				fabricImage.scaleToWidth(vw - relativeSize);
+				fabricImage.scaleToHeight(vh - relativeSize);
 			} else { //portrait
-				fabricImage.scaleToHeight(vh - 200);
-				fabricImage.scaleToWidth(vw - 200);
+				fabricImage.scaleToHeight(vh - relativeSize);
+				fabricImage.scaleToWidth(vw - relativeSize);
 			}
-			canvas.add(fabricImage);
-			canvas.centerObject(fabricImage);
-			// const rect = createRect(canvas.gridGranularity)
+			const container = new ObjectFit(fabricImage, { mode })
+			
+			canvas.add(container);
+			canvas.centerObject(container);
+			canvas.requestRenderAll()
 		};
 	};
 	fileReader.readAsDataURL(file);

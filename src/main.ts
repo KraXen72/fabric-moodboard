@@ -1,4 +1,3 @@
-// import './css/pico.min.css'
 import './css/material-icons.css'
 import './css/style.css'
 
@@ -92,7 +91,8 @@ function selectionUpdatedCallback() {
 	canvas.requestRenderAll()
 }
 
-canvas.on("selection:created", selectionCallback)
-canvas.on("selection:updated", selectionUpdatedCallback)
+// TODO reneable selection
+// canvas.on("selection:created", selectionCallback)
+// canvas.on("selection:updated", selectionUpdatedCallback)
 initToolbar(canvas, APP_SETTINGS)
 canvas.add(createRect(GRID_SIZE, { canvas }))

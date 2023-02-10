@@ -1,6 +1,8 @@
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
 import { Pane } from 'tweakpane';
+import { IObjectFit } from 'fabricjs-object-fit';
+import { FitMode } from 'fabricjs-object-fit';
 
 const toolbar = document.getElementById("toolbar")
 
@@ -21,6 +23,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		],
 		index: 0
 	})
+	const dummy = { key: 'key' }
+	let _activeObj: fabric.Object | IObjectFit | null = null
 
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnMove', {label: "on move"})
@@ -40,7 +44,24 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	topTabs.pages[0].addSeparator()
 
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
+	// current object
+	function refreshActiveObjectControls() {
+		_activeObj = canvas.getActiveObject()
+		activeObjectControls.coverContain.hidden = _activeObj?.type === 'objectFit' ? false : true
+		pane.refresh();
+	}
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))
+	topTabs.pages[1].addButton({ title: 'Log type to console' }).on('click', () => console.log(canvas.getActiveObject().type))
+	topTabs.pages[1].addButton({ title: 'Refresh' }).on('click', refreshActiveObjectControls)
+	topTabs.pages[1].addSeparator()
+
+	//FIXME doesen't update objectfit's mode
+	const activeObjectControls = {
+		coverContain: topTabs.pages[1].addInput(dummy, 'key', {
+			label: "coverContain", 
+			options: { 'cover': FitMode.COVER, 'contain': FitMode.COVER }
+		}).on("change", ({ value }) => _activeObj!.set({ mode: value }))
+	}
 	
 	addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
@@ -49,6 +70,10 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
 		const input = event.target as HTMLInputElement
 		if (input.files.length === 0) return;
-		readAndAddImage(canvas, input.files[0]) 
+		readAndAddImage(canvas, input.files[0], 'cover') 
 	})
+
+	//TODO reset size
+
+	refreshActiveObjectControls()
 }

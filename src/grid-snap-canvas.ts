@@ -1,6 +1,7 @@
 // import { RecursivePartial } from './utils';
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
+import { IObjectFit } from "fabricjs-object-fit";
 
 /** calculate the nearest position that will follow grid */
 export function snapGrid(cord: number, gridGranularity: number): number {
@@ -62,6 +63,11 @@ export class GridSnapCanvas extends fabric.Canvas {
     // Avoid singularities
     active.scaleX = (active.scaleY >= 0 ? 1 : -1) * Math.max(Math.abs(active.scaleX), 0.001);
     active.scaleY = (active.scaleY >= 0 ? 1 : -1) * Math.max(Math.abs(active.scaleY), 0.001);
+
+		if (active.type === 'objectFit') {
+			const _active = active as IObjectFitFull
+			if (_active?.enableRecomputeOnScaling) _active!.handleRecomputeOnScaling()
+		}
   }
 
 	private handleObjectMoving(e: IEvent<MouseEvent>) {
@@ -70,6 +76,8 @@ export class GridSnapCanvas extends fabric.Canvas {
 
 	private handleObjectModified(e: IEvent<MouseEvent>) {
 		if (this.cfg_snapOnMove && this.cfg_smoothSnapping) this.snapObjectToGrid(e.target)
+		const _active = this.getActiveObject() as IObjectFitFull
+		if (_active.type === 'objectFit' && _active?.enableRecomputeOnScaled) _active!.handleRecomputeOnScaled()
 	}
 
 	// /** ensures the object's scale precisely matches the  */
