@@ -95,7 +95,6 @@ function selectionUpdatedCallback() {
 	canvas.requestRenderAll()
 }
 
-// TODO reneable selection
 canvas.on("selection:created", selectionCallback)
 canvas.on("selection:updated", selectionUpdatedCallback)
 initToolbar(canvas, APP_SETTINGS)
