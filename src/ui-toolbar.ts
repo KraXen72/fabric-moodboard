@@ -1,8 +1,7 @@
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
 import { Pane } from 'tweakpane';
-import { IObjectFit } from 'fabricjs-object-fit';
-import { FitMode } from 'fabricjs-object-fit';
+import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
 
 const toolbar = document.getElementById("toolbar")
 
@@ -47,7 +46,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	// current object
 	function refreshActiveObjectControls() {
 		_activeObj = canvas.getActiveObject()
-		activeObjectControls.coverContain.hidden = _activeObj?.type === 'objectFit' ? false : true
+		coverContain.hidden = _activeObj?.type === 'objectFit' ? false : true
 		pane.refresh();
 	}
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))
@@ -55,13 +54,15 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	topTabs.pages[1].addButton({ title: 'Refresh' }).on('click', refreshActiveObjectControls)
 	topTabs.pages[1].addSeparator()
 
-	//FIXME doesen't update objectfit's mode
-	const activeObjectControls = {
-		coverContain: topTabs.pages[1].addInput(dummy, 'key', {
-			label: "coverContain", 
-			options: { 'cover': FitMode.COVER, 'contain': FitMode.COVER }
-		}).on("change", ({ value }) => _activeObj!.set({ mode: value }))
-	}
+	const coverContain = topTabs.pages[1].addInput(dummy, 'key', {
+		label: "fitMode", 
+		options: { 'cover': FitMode.COVER, 'contain': FitMode.CONTAIN }
+	}).on("change", (ev) => {
+		const _active = _activeObj as IObjectFitFull
+		_active.mode = ev.value as IFitMode
+		_active.recompute()
+		canvas.requestRenderAll()
+	})
 	
 	addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
@@ -75,5 +76,5 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 
 	//TODO reset size
 
-	refreshActiveObjectControls()
+	// refreshActiveObjectControls()
 }

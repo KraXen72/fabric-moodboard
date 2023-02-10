@@ -78,11 +78,4 @@ export class GridSnapCanvas extends fabric.Canvas {
 		const _active = this.getActiveObject() as IObjectFitFull
 		if (_active.type === 'objectFit' && _active?.enableRecomputeOnScaled) _active!.handleRecomputeOnScaled()
 	}
-
-	// /** ensures the object's scale precisely matches the  */
-	// ensureObjectScaleSnapped(object: fabric.Object) {
-	// 	if (this.cfg_snapOnMove) this.snapObjectToGrid(object) // snap if we snap on move
-	// 	// @ts-ignore
-	// 	if (this.cfg_snapOnResize) this.handleObjectScaling({ transform: { corner: 'bl' } }, object) // simulate a bottom-left resize
-	// }
 }

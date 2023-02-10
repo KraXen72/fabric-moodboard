@@ -258,21 +258,21 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 		imgElement.src = fileReader.result as string;
 
 		imgElement.onload = () => {
-			const vw = getViewportWidth()
-			const vh = getViewportHeight()
-			const relativeSize = canvas.gridGranularity * 5
-			// let width = vw - relativeSize;
-			// let height = vh - relativeSize;
+			
+			const vw = imgElement.naturalWidth
+			const vh = imgElement.naturalHeight
+			const imageSize = canvas.gridGranularity * 10
 
 			const fabricImage = createImage(imgElement)
 			if (vw > vh) { //landscape
-				fabricImage.scaleToWidth(vw - relativeSize);
-				fabricImage.scaleToHeight(vh - relativeSize);
+				fabricImage.scaleToWidth(imageSize);
+				fabricImage.scaleToHeight(imageSize);
 			} else { //portrait
-				fabricImage.scaleToHeight(vh - relativeSize);
-				fabricImage.scaleToWidth(vw - relativeSize);
+				fabricImage.scaleToHeight(imageSize);
+				fabricImage.scaleToWidth(imageSize);
 			}
 			const container = new ObjectFit(fabricImage, { mode })
+			container.set(DEFAULT_RECT_OPTS)
 			
 			canvas.add(container);
 			canvas.centerObject(container);
