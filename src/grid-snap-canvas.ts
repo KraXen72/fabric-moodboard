@@ -1,7 +1,6 @@
 // import { RecursivePartial } from './utils';
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
-import { IObjectFit } from "fabricjs-object-fit";
 
 /** calculate the nearest position that will follow grid */
 export function snapGrid(cord: number, gridGranularity: number): number {
