@@ -32,3 +32,15 @@ export type RecursivePartial<T> = {
     T[P] extends object ? RecursivePartial<T[P]> :
     T[P];
 };
+
+/**
+ * Math.round but behaves correctly when rounding floating point numbers
+ * it does this by first converting the numbers to integers, rounding them and then dividing them back to floating points.
+ * @param {number} number number to round
+ * @param {number} precision the decimal points precision. default it 2
+ * @returns {number} the rounded number with correct decimal points
+ */
+export function precisionRound(number: number, precision = 2) {
+	let factor = Math.pow(10, precision);
+	return Math.round(number * factor) / factor;
+}

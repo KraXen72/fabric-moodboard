@@ -101,7 +101,7 @@ function _newPastePosition(
 	} else {
 		// in this case the object's top is usually negative = relative to selection
 		// and the selection is positive = real position, but also center based & not topleft
-		// so we have to account & normalize both
+		// so we have to account for & normalize both
 		const halfW = Math.round(twin.width / 2)
 		const halfH =  Math.round(twin.height / 2)
 		switch (pastePosition) {
@@ -271,11 +271,15 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 				fabricImage.scaleToHeight(imageSize);
 				fabricImage.scaleToWidth(imageSize);
 			}
-			const container = _postprocessObject(new ObjectFit(fabricImage, { mode }), { cleanup: false, setDefaults: true })
-			
+			const container = _postprocessObject(new ObjectFit(fabricImage, { mode }), { cleanup: false, setDefaults: true }) as IObjectFitFull
+
 			canvas.add(container);
 			canvas.centerObject(container);
 			canvas.requestRenderAll()
+			container.set({ originalImageDimensions: { 
+				width: Math.round(container.width * container.scaleX),
+				height: Math.round(container.height * container.scaleY)
+			}})
 		};
 	};
 	fileReader.readAsDataURL(file);

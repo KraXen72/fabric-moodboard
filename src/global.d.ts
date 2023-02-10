@@ -16,7 +16,15 @@ declare global {
 	}
 
 	type coverContain = 'cover' | 'contain'
-	type IObjectFitFull = IObjectFit & { handleRecomputeOnScaled?: Function, handleRecomputeOnScaling?: Function }
+	type IObjectFitFull = IObjectFit & { 
+		handleRecomputeOnScaled?: Function, 
+		handleRecomputeOnScaling?: Function
+		// added by me
+		originalImageDimensions?: {
+			width: number,
+			height: number
+		}
+	}
 }
 
 export {};
