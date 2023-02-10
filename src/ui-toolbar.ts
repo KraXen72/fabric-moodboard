@@ -103,8 +103,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		canvas.requestRenderAll()
 	})
 	const staFolder =  topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
-	staFolder.addButton({ title: "Keeping width, adjust height" }).on("click", () => { scaleToAspectRatio("height") })
-	staFolder.addButton({ title: "Keeping height, adjust width" }).on("click", () => { scaleToAspectRatio("width") })
+	staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio("height") })
+	staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio("width") })
 
 	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
