@@ -1,6 +1,6 @@
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
-import { Pane } from 'tweakpane';
+import { Pane, BladeApi } from 'tweakpane';
 import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
 
 const toolbar = document.getElementById("toolbar")
@@ -30,9 +30,9 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 			{title: 'Current Object'}
 		], index: 0
 	})
-	const dummy = { key: 'key' }
-	const fitOptions = { 'default (stretch)': FitMode.FILL,'cover': FitMode.COVER, 'contain': FitMode.CONTAIN }
-	let _activeObj: fabric.Object | IObjectFit | null = null
+	const fitOptions = { cover: FitMode.COVER, contain: FitMode.CONTAIN, 'default (stretch)': FitMode.FILL }
+	let activeObjControls: BladeApi<any>[] = []
+	let _activeObj: fabric.Object | IObjectFit | { mode: string } = { mode: appSettings.defaultFitMode }
 
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
 	snapToGridFolder.addInput(canvas, 'cfg_snapOnMove', {label: "on move"})
@@ -40,8 +40,9 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	snapToGridFolder.addInput(canvas, 'cfg_smoothSnapping', {label: "smooth"})
 	topTabs.pages[0].addSeparator()
 
-	const imageFolder = topTabs.pages[0].addFolder({ title: 'Images' })
+	const imageFolder = topTabs.pages[0].addFolder({ title: 'Images (defaults)' })
 	imageFolder.addInput(appSettings, 'defaultFitMode', { label: 'fit-mode', options: fitOptions})
+	imageFolder.addInput(appSettings, 'defaultImageCellSize', { label: 'size(cell)', min: 3, max: 20, step: 1 })
 	topTabs.pages[0].addSeparator()
 
 	const cloneFolder = topTabs.pages[0].addFolder({ title: 'When duplicating, the new object'})
@@ -58,14 +59,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
 
 	// current object
-	function refreshActiveObjectControls() {
-		_activeObj = canvas.getActiveObject() 
-		const isObjFit = _activeObj?.type === 'objectFit' ? false : true
-		activeImageFolder.hidden = isObjFit
-		staFolder.hidden = isObjFit
-		activePartSeparator.hidden = isObjFit
-		pane.refresh();
-	}
+
 	function scaleToAspectRatio(adjust: 'width' | 'height') {
 		const _active = canvas.getActiveObject() as IObjectFitFull
 		if (adjust === 'width') {
@@ -79,34 +73,51 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		canvas.requestRenderAll()
 	}
 
-	topTabs.on('select', (ev) => { if (ev.index === 1) refreshActiveObjectControls() })
+	function refreshActiveObjectControls() {
+		_activeObj = canvas.getActiveObject() 
+		const isObjFit = _activeObj?.type === 'objectFit' ? true : false
+
+		activeObjControls.forEach(control => control.dispose())
+		activePartSeparator.hidden = !isObjFit
+		if (isObjFit) setUpActiveObjectControls()
+		pane.refresh();
+	}
+
+	/** set up tweakpane controls for the current active object */
+	function setUpActiveObjectControls() {
+		const activeImageFolder = topTabs.pages[1].addFolder({ title: "Selected Image" })
+		activeImageFolder.addInput((_activeObj as IObjectFitFull), 'mode', {
+			label: "fitMode",
+			options: fitOptions
+		}).on("change", (ev) => {
+			const _active = canvas.getActiveObject() as IObjectFitFull
+			_active.mode = ev.value as IFitMode
+			_active.recompute()
+			canvas.requestRenderAll()
+		})
+
+		activeImageFolder.addButton({ title: 'Reset original size' }).on("click", () => {
+			const _active = canvas.getActiveObject() as IObjectFitFull
+			const dims = _active.originalImageDimensions
+			_active.set({ width: dims.width, height: dims.height })
+			_active.recompute()
+			canvas.requestRenderAll()
+		})
+
+		const staFolder = topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
+		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio("height") })
+		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio("width") })
+
+		activeObjControls = [ activeImageFolder, staFolder ]
+	}
+
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))
-	topTabs.pages[1].addButton({ title: 'Log type to console' }).on('click', () => console.log(canvas.getActiveObject().type))
 	topTabs.pages[1].addButton({ title: 'Refresh' }).on('click', refreshActiveObjectControls)
 	const activePartSeparator = topTabs.pages[1].addSeparator()
 
-	const activeImageFolder = topTabs.pages[1].addFolder({ title: "Selected Image" })
-	activeImageFolder.addInput(dummy, 'key', {
-		label: "fitMode", 
-		options: fitOptions
-	}).on("change", (ev) => {
-		const _active = canvas.getActiveObject() as IObjectFitFull
-		_active.mode = ev.value as IFitMode
-		_active.recompute()
-		canvas.requestRenderAll()
-	})
+	topTabs.on('select', (ev) => { if (ev.index === 1) refreshActiveObjectControls() })
 
-	activeImageFolder.addButton({ title: 'Reset original size' }).on("click", () => {
-		const _active = canvas.getActiveObject() as IObjectFitFull
-		const dims = _active.originalImageDimensions
-		_active.set({ width: dims.width, height: dims.height })
-		_active.recompute()
-		canvas.requestRenderAll()
-	})
-	const staFolder =  topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
-	staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio("height") })
-	staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio("width") })
-
+	// big buttons
 	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
 	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
@@ -116,10 +127,9 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
 		const input = event.target as HTMLInputElement
 		if (input.files.length === 0) return;
-		readAndAddImage(canvas, input.files[0], appSettings.defaultFitMode) 
+		readAndAddImage(canvas, input.files[0], appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
 	})
 
-	//TODO reset size
 	refreshActiveObjectControls()
 }
 

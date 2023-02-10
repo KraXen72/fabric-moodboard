@@ -250,7 +250,7 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 // credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
 // both further modified by KraXen72
-export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverContain = "cover") {
+export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverContain = "cover", cellsSize = 10) {
 	const fileReader = new FileReader();
 
 	fileReader.onload = () => {
@@ -261,7 +261,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 			
 			const vw = imgElement.naturalWidth
 			const vh = imgElement.naturalHeight
-			const imageSize = canvas.gridGranularity * 10
+			const imageSize = canvas.gridGranularity * cellsSize
 
 			const fabricImage = createImage(imgElement)
 			if (vw > vh) { //landscape

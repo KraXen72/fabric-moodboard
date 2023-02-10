@@ -4,6 +4,7 @@ declare global {
 	interface appSettings {
 		pasteDirection: 'right' | 'left' | 'above' | 'below',
 		defaultFitMode: 'cover' | 'contain',
+		defaultImageCellSize: number,
 		allowResizeSelection: boolean
 	}
 	
