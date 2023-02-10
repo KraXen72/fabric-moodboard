@@ -31,7 +31,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		], index: 0
 	})
 	const dummy = { key: 'key' }
-	const fitOptions = { 'cover': FitMode.COVER, 'contain': FitMode.CONTAIN }
+	const fitOptions = { 'default (stretch)': FitMode.FILL,'cover': FitMode.COVER, 'contain': FitMode.CONTAIN }
 	let _activeObj: fabric.Object | IObjectFit | null = null
 
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
@@ -63,10 +63,11 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		const isObjFit = _activeObj?.type === 'objectFit' ? false : true
 		activeImageFolder.hidden = isObjFit
 		staFolder.hidden = isObjFit
+		activePartSeparator.hidden = isObjFit
 		pane.refresh();
 	}
 	function scaleToAspectRatio(adjust: 'width' | 'height') {
-		const _active = _activeObj as IObjectFitFull
+		const _active = canvas.getActiveObject() as IObjectFitFull
 		if (adjust === 'width') {
 			const factor = _active.height / _active.originalImageDimensions.height
 			_active.set({ width: _active.originalImageDimensions.width * factor })
@@ -82,21 +83,21 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))
 	topTabs.pages[1].addButton({ title: 'Log type to console' }).on('click', () => console.log(canvas.getActiveObject().type))
 	topTabs.pages[1].addButton({ title: 'Refresh' }).on('click', refreshActiveObjectControls)
-	topTabs.pages[1].addSeparator()
+	const activePartSeparator = topTabs.pages[1].addSeparator()
 
 	const activeImageFolder = topTabs.pages[1].addFolder({ title: "Selected Image" })
 	activeImageFolder.addInput(dummy, 'key', {
 		label: "fitMode", 
 		options: fitOptions
 	}).on("change", (ev) => {
-		const _active = _activeObj as IObjectFitFull
+		const _active = canvas.getActiveObject() as IObjectFitFull
 		_active.mode = ev.value as IFitMode
 		_active.recompute()
 		canvas.requestRenderAll()
 	})
 
 	activeImageFolder.addButton({ title: 'Reset original size' }).on("click", () => {
-		const _active = _activeObj as IObjectFitFull
+		const _active = canvas.getActiveObject() as IObjectFitFull
 		const dims = _active.originalImageDimensions
 		_active.set({ width: dims.width, height: dims.height })
 		_active.recompute()

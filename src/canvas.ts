@@ -276,10 +276,11 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 			canvas.add(container);
 			canvas.centerObject(container);
 			canvas.requestRenderAll()
-			container.set({ originalImageDimensions: { 
+			container.set({ originalImageDimensions: {  // after scaling & placing image, remember it's dimensions
 				width: Math.round(container.width * container.scaleX),
 				height: Math.round(container.height * container.scaleY)
 			}})
+			canvas.setActiveObject(container)
 		};
 	};
 	fileReader.readAsDataURL(file);
