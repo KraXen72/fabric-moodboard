@@ -1,7 +1,7 @@
-import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
-import { Pane, BladeApi } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
+import { Pane, BladeApi } from 'tweakpane';
+import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
@@ -128,9 +128,5 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		if (input.files.length === 0) return;
 		readAndAddImage(canvas, input.files[0], appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
 	})
-}
-
-export function clearFileReader() { 
-	(document.getElementById('filereader') as HTMLInputElement).value = null
 }
 
