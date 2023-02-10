@@ -4,6 +4,8 @@ import { Pane } from 'tweakpane';
 import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
 
 const toolbar = document.getElementById("toolbar")
+const hotkeyController = new AbortController()
+const { signal } = hotkeyController
 
 function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, ev: MouseEvent) => any, title?: string) {
 	const btn = document.createElement('button')
@@ -11,6 +13,13 @@ function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, e
 	btn.innerHTML = `<span class="material-symbols-rounded">${materialIcon}</span>`
 	if (title) btn.title = title
 	toolbar.appendChild(btn)
+	return btn
+}
+
+function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElement) {
+	document.addEventListener('keyup', (ev) => { 
+		if (ev.code.toLowerCase() === keycode.toLowerCase() && document.activeElement === document.body) button.click()
+	}, { signal })
 }
 
 export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
@@ -19,8 +28,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		pages: [
 			{title: 'Settings'},
 			{title: 'Current Object'}
-		],
-		index: 0
+		], index: 0
 	})
 	const dummy = { key: 'key' }
 	const fitOptions = { 'cover': FitMode.COVER, 'contain': FitMode.CONTAIN }
@@ -73,9 +81,11 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		canvas.requestRenderAll()
 	})
 	
-	addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
-	addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
-	addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
+	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
+	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
+	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
+
+	registerHotkey('delete', delBtn)
 	
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
 		const input = event.target as HTMLInputElement
@@ -86,3 +96,4 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	//TODO reset size
 	refreshActiveObjectControls()
 }
+
