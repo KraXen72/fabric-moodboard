@@ -1,6 +1,6 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
-import { setup, IFitMode, IObjectFit, IGetFittedObjectPayload } from "fabricjs-object-fit";
+import { setup } from "fabricjs-object-fit";
 import { customObjectFitControls } from "./active-object";
 import { GridSnapCanvas } from "./grid-snap-canvas";
 import { clearFileReader } from "./ui-toolbar";
@@ -251,34 +251,7 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 	canvas.setBackgroundColor({ source: inlineSVGString(tileSvgString) }, canvasBgCallback)
 }
 
-class ControlledObjectFit extends ObjectFit {
-	constructor(obj: fabric.Object, options?: Partial<IGetFittedObjectPayload & { mode: IFitMode; } & Pick<IObjectFit, "useObjectTransform" | "enableRecomputeOnScaled" | "enableRecomputeOnScaling">>) {
-		
-		super(obj, options)
-	}
-
-	// private _icon(icon: string, size: number = 16) {
-	// 	return function renderIcon(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: any, fabricObject: fabric.Object) {
-	// 		const svg = inlineSVGString(`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" version="1.1" xmlns="http://www.w3.org/2000/svg">
-	// 			</defs>
-	// 			<g>
-	// 				<text fill="#a3a5aa" stroke="#000000" stroke-width="0" font-size="${size}" font-family="MaterialSymbolsRounded" text-anchor="middle" xml:space="preserve">${icon}</text>
-	// 			</g>
-	// 		</svg>`)
-	// 		ctx.save();
-	// 		ctx.translate(left, top);
-	// 		ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
-	// 		ctx.drawImage(Object.assign(document.createElement("img"), { src: svg }), -size/2, -size/2, size, size);
-	// 		ctx.restore();
-	// 	}
-	// }
-
-	// private testMouseUpHandler(EventData: MouseEvent, transformData: fabric.Transform) {
-	// 	console.log(EventData, transformData)
-	// 	return true
-	// }
-}
-Object.assign(ControlledObjectFit.prototype.controls, customObjectFitControls())
+Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 
 /* type preProcessOptions = { addControls: boolean }
 function _preprocessObject(object: fabric.Object, opts: preProcessOptions = { addControls: true }) {
@@ -320,7 +293,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 				fabricImage.scaleToWidth(imageSize);
 			}
 			
-			const _objectFit = new ControlledObjectFit(fabricImage, { mode, enableRecomputeOnScaled: true })
+			const _objectFit = new ObjectFit(fabricImage, { mode, enableRecomputeOnScaled: true })
 			const container = _postprocessObject(_objectFit, { cleanup: false, setDefaults: true }) as IObjectFitFull
 
 			canvas.add(container);
@@ -359,11 +332,11 @@ export function createRect(size: number, options?: newRectOptions) {
 		width: (options?.width ?? randomNumberBetween(2, 5)) * size,
 		height: (options?.width ?? randomNumberBetween(2, 5)) * size,
 		fill: backgroundColor,
-		backgroundColor: backgroundColor,
+		backgroundColor: backgroundColor
 	}
 	if (options?.canvas) rectOptions.canvas = options.canvas
-
-	return _postprocessObject(new fabric.Rect(rectOptions));
+	const rect = _postprocessObject(new fabric.Rect(rectOptions));
+	return rect
 }
 // todo remove this abstraction / de-extract, put back in place
 export function createImage(imgElement: HTMLImageElement | HTMLVideoElement, options?: newObjectSharedOptions) {

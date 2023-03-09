@@ -7,6 +7,7 @@ import { debounce } from './utils';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, createRect } from './canvas';
 import { initToolbar } from './ui-toolbar';
+import { customControls } from './active-object';
 
 const GRID_SIZE = 32 //grid size in px
 if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
@@ -62,11 +63,18 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
   this.selection = true;
 });
 
+/** show custom controls for Image, hide for Rect */
+function _updateCustomControlsVisiblity(object: fabric.Object) {
+	customControls.forEach(ctrlKey => {
+		if (Object.keys(object.controls).includes(ctrlKey)) object.controls[ctrlKey].setVisibility(object.type === "objectFit")
+	})
+}
 
 // remove most controls from selections, because we don't want users to be able to resize them - it messes with the grid
 const selectionControls = { bl: false, br: false, tl: false, tr: false, mtr: false}
 function selectionCallback(e: fabric.IEvent<MouseEvent>) {
 	const active = canvas.getActiveObject()
+	_updateCustomControlsVisiblity(active)
 	if (!(e.selected.length !== 1 || active.hasOwnProperty('_objects'))) return;
 	if (active.type === "objectFit" && e.selected.length === 1) return;
 	if (!canvas.cfg_snapOnResize) return;
@@ -79,6 +87,7 @@ function selectionCallback(e: fabric.IEvent<MouseEvent>) {
 }
 
 function selectionUpdatedCallback() {
+	_updateCustomControlsVisiblity(canvas.getActiveObject())
 	if (canvas.getActiveObject().type !== 'activeSelection') return;
 	if (!canvas.cfg_snapOnResize) return;
 

@@ -1,8 +1,8 @@
-import { IObjectFit, FitMode, IFitMode, Point, IPoint } from 'fabricjs-object-fit';
+import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
 import { Pane, BladeApi } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
-import { scaleToAspectRatio, updateActiveObjPosRel } from './active-object';
+import { scaleToAspectRatio } from './active-object';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
@@ -33,10 +33,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		], index: 0
 	})
 	const fitOptions = { cover: FitMode.COVER, contain: FitMode.CONTAIN, 'default (stretch)': FitMode.FILL }
-	const posControlOptions = { default: 'default', percentage: 'percentSlider', pixels: 'absoluteSlider' }
 
 	let activeObjControls: BladeApi<any>[] = [] /** reference so they can be disposed of later */
-	let positionControl: { current: keyof typeof posControlOptions }  = { current: 'default' }
 	
 	// settings - tab 0
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
@@ -99,35 +97,6 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		const staFolder = topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
 		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height") })
 		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width") })
-
-		// const posSeparator = topTabs.pages[1].addSeparator()
-
-		// const positionFolder = topTabs.pages[1].addFolder({ title: "Position" })
-		// positionFolder.addInput(positionControl, 'current', { label: 'mode', options: posControlOptions })
-		// positionFolder.addSeparator()
-
-		// type positionChangeEvent = { value: IPoint }
-
-		// //TODO move to picker component
-		// positionFolder.addBlade({
-		// 	view: 'list', label: "x", 
-		// 	options: [
-		// 		{ text: 'center', value: Point.X.CENTER },
-		// 		{ text: 'left', value: Point.X.LEFT },
-		// 		{ text: 'right', value: Point.X.RIGHT }, 
-		// 	],
-		// 	value: Point.X.CENTER
-		// }).on('change', (ev: positionChangeEvent) => updateActiveObjPosRel(canvas, "x", ev.value))
-
-		// positionFolder.addBlade({
-		// 	view: 'list', label: "y", 
-		// 	options: [
-		// 		{ text: 'center', value: Point.Y.CENTER },
-		// 		{ text: 'top', value: Point.Y.TOP },
-		// 		{ text: 'bottom', value: Point.Y.BOTTOM }, 
-		// 	],
-		// 	value: Point.Y.CENTER
-		// }).on('change', (ev: positionChangeEvent) => updateActiveObjPosRel(canvas, "y", ev.value))
 
 		activeObjControls = [ activeImageFolder, staFolder, /*posSeparator, positionFolder*/ ]
 	}

@@ -20,6 +20,7 @@ export function scaleToAspectRatio(canvas: fabricCanvasExtended, adjust: 'width'
 
 export function updateActiveObjPosRel(canvas: fabricCanvasExtended, key: keyof Partial<IPosition>, value: IPoint) {
 	const _active = canvas.getActiveObject() as IObjectFitFull
+	if (_active.type !== "ObjectFit") return;
 	_active.position[key] = value
 	_active.recompute()
 	canvas.requestRenderAll()
@@ -67,6 +68,7 @@ class IconRenderer {
 		ctx.restore();
 	}
 
+
 	topArrow(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object, opts: ControlIconOpts ) {
 		this.#renderBgCircle(ctx, left, top, opts)
 		const size = opts?.size ? Math.round(opts.size / 3) : 4;
@@ -104,7 +106,14 @@ class IconRenderer {
 	}
 }
 
-
+export const customControls = [
+	"TopYControl",
+	"BottomYControl", 
+	"MiddleYControl",
+	"LeftXControl",
+	"MiddleXControl", 
+	"RightXControl"
+]
 
 export function customObjectFitControls() {
 	const iconRenderer = new IconRenderer()
