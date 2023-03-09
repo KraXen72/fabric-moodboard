@@ -1,7 +1,8 @@
-import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
+import { IObjectFit, FitMode, IFitMode, Point, IPoint } from 'fabricjs-object-fit';
 import { Pane, BladeApi } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
+import { scaleToAspectRatio, updateActiveObjPosRel } from './active-object';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
@@ -15,6 +16,7 @@ function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, e
 	toolbar.appendChild(btn)
 	return btn
 }
+export const materialIconsSvgStyleTag = `<style>@font-face { font-family: 'MaterialSymbolsRounded'; font-style: normal; font-weight: 300; src: url('material-symbols-rounded-thin-specific.woff2') format('woff2'); }</style>`
 
 function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElement) {
 	document.addEventListener('keyup', (ev) => { 
@@ -26,12 +28,15 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const pane = new Pane();
 	const topTabs = pane.addTab({
 		pages: [
-			{title: 'Settings'},
+			{title: 'Canvas'},
 			{title: 'Current Object'}
 		], index: 0
 	})
 	const fitOptions = { cover: FitMode.COVER, contain: FitMode.CONTAIN, 'default (stretch)': FitMode.FILL }
+	const posControlOptions = { default: 'default', percentage: 'percentSlider', pixels: 'absoluteSlider' }
+
 	let activeObjControls: BladeApi<any>[] = [] /** reference so they can be disposed of later */
+	let positionControl: { current: keyof typeof posControlOptions }  = { current: 'default' }
 	
 	// settings - tab 0
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
@@ -59,18 +64,6 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
 
 	// current object - tab 1
-	function scaleToAspectRatio(adjust: 'width' | 'height') {
-		const _active = canvas.getActiveObject() as IObjectFitFull
-		if (adjust === 'width') {
-			const factor = _active.height / _active.originalImageDimensions.height
-			_active.set({ width: _active.originalImageDimensions.width * factor })
-		} else {
-			const factor = _active.width / _active.originalImageDimensions.width
-			_active.set({ height: _active.originalImageDimensions.height * factor })
-		}
-		_active.recompute()
-		canvas.requestRenderAll()
-	}
 
 	function refreshActiveObjectControls() {
 		let _activeObj: fabric.Object | IObjectFit | { mode: string } = canvas.getActiveObject()
@@ -104,10 +97,39 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		})
 
 		const staFolder = topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
-		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio("height") })
-		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio("width") })
+		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height") })
+		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width") })
 
-		activeObjControls = [ activeImageFolder, staFolder ]
+		// const posSeparator = topTabs.pages[1].addSeparator()
+
+		// const positionFolder = topTabs.pages[1].addFolder({ title: "Position" })
+		// positionFolder.addInput(positionControl, 'current', { label: 'mode', options: posControlOptions })
+		// positionFolder.addSeparator()
+
+		// type positionChangeEvent = { value: IPoint }
+
+		// //TODO move to picker component
+		// positionFolder.addBlade({
+		// 	view: 'list', label: "x", 
+		// 	options: [
+		// 		{ text: 'center', value: Point.X.CENTER },
+		// 		{ text: 'left', value: Point.X.LEFT },
+		// 		{ text: 'right', value: Point.X.RIGHT }, 
+		// 	],
+		// 	value: Point.X.CENTER
+		// }).on('change', (ev: positionChangeEvent) => updateActiveObjPosRel(canvas, "x", ev.value))
+
+		// positionFolder.addBlade({
+		// 	view: 'list', label: "y", 
+		// 	options: [
+		// 		{ text: 'center', value: Point.Y.CENTER },
+		// 		{ text: 'top', value: Point.Y.TOP },
+		// 		{ text: 'bottom', value: Point.Y.BOTTOM }, 
+		// 	],
+		// 	value: Point.Y.CENTER
+		// }).on('change', (ev: positionChangeEvent) => updateActiveObjPosRel(canvas, "y", ev.value))
+
+		activeObjControls = [ activeImageFolder, staFolder, /*posSeparator, positionFolder*/ ]
 	}
 
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))

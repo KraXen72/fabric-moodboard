@@ -1,11 +1,12 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
-import { setup } from "fabricjs-object-fit";
+import { setup, IFitMode, IObjectFit, IGetFittedObjectPayload } from "fabricjs-object-fit";
+import { customObjectFitControls } from "./active-object";
 import { GridSnapCanvas } from "./grid-snap-canvas";
 import { clearFileReader } from "./ui-toolbar";
 import { randomNumberBetween } from "./utils";
 
-export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number}
+export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number }
 export type viewportBorders = {
 	top: fabric.Line,
 	right: fabric.Line,
@@ -23,7 +24,7 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	cornerStyle: 'circle',
 	cornerSize: 12
 }
-const DEFAULT_RECT_COLORS = ["f4f1de","e07a5f","3d405b","81b29a","f2cc8f"]
+const DEFAULT_RECT_COLORS = ["f4f1de", "e07a5f", "3d405b", "81b29a", "f2cc8f"]
 
 const { ObjectFit } = setup(fabric)
 
@@ -52,11 +53,11 @@ export function resetViewportTransform(canvas: fabricCanvasExtended) {
 	canvas.setViewportTransform(vpt)
 	canvas.requestRenderAll();
 }
- 
+
 /** remove the current activeObject or even selection */
 export function removeActiveObject(canvas: fabricCanvasExtended) {
 	const activeObjLength = canvas.getActiveObjects().length
-	canvas.getActiveObjects().forEach(object => canvas.remove(object)) 
+	canvas.getActiveObjects().forEach(object => canvas.remove(object))
 	if (activeObjLength > 1) canvas.discardActiveObject()
 }
 
@@ -65,7 +66,8 @@ type postProcessOptions = { cleanup: boolean, setDefaults: boolean }
 /** do some post / pre processing on an object. like set rounded corners, default, values, cleanup, etc... */
 function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { cleanup: false, setDefaults: false }) {
 	if (opts.setDefaults) object.set(DEFAULT_RECT_OPTS) //@ts-ignore-next-line, ts doesen't like untyped deleting of props from objects
-	if (opts.cleanup) [0, 1, 2, 3, 4, 'globalCompositeOperation', 'version'].forEach((key: any) => delete object[key]) 
+	if (opts.cleanup) [0, 1, 2, 3, 4, 'globalCompositeOperation', 'version'].forEach((key: any) => delete object[key])
+
 	object.setControlsVisibility({ mtr: false })
 	return object
 }
@@ -107,7 +109,7 @@ function _newPastePosition(
 		// and the selection is positive = real position, but also center based & not topleft
 		// so we have to account for & normalize both
 		const halfW = Math.round(twin.width / 2)
-		const halfH =  Math.round(twin.height / 2)
+		const halfH = Math.round(twin.height / 2)
 		switch (pastePosition) {
 			case "above":
 				return {
@@ -143,7 +145,7 @@ export function duplicateSelection(canvas: GridSnapCanvas, appSettings: appSetti
 		return new Promise((resolve) => {
 			// Only copy essential properties
 			const cloneProps = ['left', 'top', 'width', 'height', 'fill', 'backgroundColor', 'originX', 'originY', 'selectable']
-			const postProcessOpts = { cleanup: true, setDefaults: true }
+			const postProcessOpts = { cleanup: true, setDefaults: true, addControls: false }
 			object.clone((object: fabric.Object) => resolve(_postprocessObject(object, postProcessOpts)), cloneProps)
 		});
 	});
@@ -188,10 +190,10 @@ export function resizeCanvas(canvas: fabricCanvasExtended, vptBorders: viewportB
 	if (vptBorders !== null) {
 		const v = getViewportCorners()
 
-		vptBorders.top.set({x1: v.tl[0], y1: v.tl[1], x2: v.tr[0], y2: v.tr[1]})
-		vptBorders.right.set({x1: v.tr[0], y1: v.tr[1], x2: v.br[0], y2: v.br[1]})
-		vptBorders.bottom.set({x1: v.bl[0], y1: v.bl[1], x2: v.br[0], y2: v.br[1]})
-		vptBorders.left.set({x1: v.tl[0], y1: v.tl[1], x2: v.bl[0], y2: v.bl[1]})
+		vptBorders.top.set({ x1: v.tl[0], y1: v.tl[1], x2: v.tr[0], y2: v.tr[1] })
+		vptBorders.right.set({ x1: v.tr[0], y1: v.tr[1], x2: v.br[0], y2: v.br[1] })
+		vptBorders.bottom.set({ x1: v.bl[0], y1: v.bl[1], x2: v.br[0], y2: v.br[1] })
+		vptBorders.left.set({ x1: v.tl[0], y1: v.tl[1], x2: v.bl[0], y2: v.bl[1] })
 		Object.values(vptBorders).forEach(v => v.setCoords())
 		canvas.requestRenderAll()
 	}
@@ -201,7 +203,7 @@ export function drawViewportBorders(canvas: fabricCanvasExtended): viewportBorde
 	const vw = getViewportWidth()
 
 	if (canvas.height !== vh || canvas.width !== vw) resizeCanvas(canvas, null)
-	
+
 	const lineStyles: ILineOptions = {
 		stroke: getDotColor(),
 		hasControls: false,
@@ -237,17 +239,59 @@ export function urlSVGString(svgString: string) {
 export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 	const circlePositions = [[size, 0], [0, 0], [size, size], [0, size]]
 	const circleStyle = `fill:${getDotColor()};stroke:#9d5867;stroke-width:0;`
-	
+
 	const tileSvgString = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" version="1.1" xmlns="http://www.w3.org/2000/svg"><defs/><g>
 		${circlePositions.map(([cx, cy]) => `<circle style="${circleStyle}" cx="${cx}" cy="${cy}" r="${r}"/>`).join("\n")}
 	</g></svg>`
-	
+
 	//() => ({repeat: "repeat"}), {repeat: "repeat"} or () => {} works too
 	// but it's best to force the canvas to render after setting of the bg color
-	const canvasBgCallback = () => setTimeout(() => canvas.requestRenderAll(), 0) 
+	const canvasBgCallback = () => setTimeout(() => canvas.requestRenderAll(), 0)
 	//@ts-ignore, setBackgroundColor's not supposed to work but it's the only way
 	canvas.setBackgroundColor({ source: inlineSVGString(tileSvgString) }, canvasBgCallback)
 }
+
+class ControlledObjectFit extends ObjectFit {
+	constructor(obj: fabric.Object, options?: Partial<IGetFittedObjectPayload & { mode: IFitMode; } & Pick<IObjectFit, "useObjectTransform" | "enableRecomputeOnScaled" | "enableRecomputeOnScaling">>) {
+		
+		super(obj, options)
+	}
+
+	// private _icon(icon: string, size: number = 16) {
+	// 	return function renderIcon(ctx: CanvasRenderingContext2D, left: number, top: number, styleOverride: any, fabricObject: fabric.Object) {
+	// 		const svg = inlineSVGString(`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	// 			</defs>
+	// 			<g>
+	// 				<text fill="#a3a5aa" stroke="#000000" stroke-width="0" font-size="${size}" font-family="MaterialSymbolsRounded" text-anchor="middle" xml:space="preserve">${icon}</text>
+	// 			</g>
+	// 		</svg>`)
+	// 		ctx.save();
+	// 		ctx.translate(left, top);
+	// 		ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
+	// 		ctx.drawImage(Object.assign(document.createElement("img"), { src: svg }), -size/2, -size/2, size, size);
+	// 		ctx.restore();
+	// 	}
+	// }
+
+	// private testMouseUpHandler(EventData: MouseEvent, transformData: fabric.Transform) {
+	// 	console.log(EventData, transformData)
+	// 	return true
+	// }
+}
+Object.assign(ControlledObjectFit.prototype.controls, customObjectFitControls())
+
+/* type preProcessOptions = { addControls: boolean }
+function _preprocessObject(object: fabric.Object, opts: preProcessOptions = { addControls: true }) {
+	if (opts.addControls) {
+		console.log("adding controls!")
+		
+		// ${materialIconsSvgStyleTag}
+		
+		
+		object.controls.XTop = 
+	}
+	return object
+} */
 
 
 
@@ -262,7 +306,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 		imgElement.src = fileReader.result as string;
 
 		imgElement.onload = () => {
-			
+
 			const vw = imgElement.naturalWidth
 			const vh = imgElement.naturalHeight
 			const imageSize = canvas.gridGranularity * cellsSize
@@ -275,15 +319,19 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 				fabricImage.scaleToHeight(imageSize);
 				fabricImage.scaleToWidth(imageSize);
 			}
-			const container = _postprocessObject(new ObjectFit(fabricImage, { mode }), { cleanup: false, setDefaults: true }) as IObjectFitFull
+			
+			const _objectFit = new ControlledObjectFit(fabricImage, { mode, enableRecomputeOnScaled: true })
+			const container = _postprocessObject(_objectFit, { cleanup: false, setDefaults: true }) as IObjectFitFull
 
 			canvas.add(container);
 			canvas.centerObject(container);
 			canvas.requestRenderAll()
-			container.set({ originalImageDimensions: {  // after scaling & placing image, remember it's dimensions
-				width: Math.round(container.width * container.scaleX),
-				height: Math.round(container.height * container.scaleY)
-			}})
+			container.set({
+				originalImageDimensions: {  // after scaling & placing image, remember it's dimensions
+					width: Math.round(container.width * container.scaleX),
+					height: Math.round(container.height * container.scaleY)
+				}
+			})
 			canvas.setActiveObject(container)
 			clearFileReader()
 		};
@@ -296,7 +344,7 @@ interface newObjectSharedOptions {
 	canvas?: GridSnapCanvas
 }
 
-interface newRectOptions extends newObjectSharedOptions { 
+interface newRectOptions extends newObjectSharedOptions {
 	width?: number,
 	height?: number
 }
