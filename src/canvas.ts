@@ -22,7 +22,8 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	transparentCorners: false,
 	strokeWidth: 0,
 	cornerStyle: 'circle',
-	cornerSize: 12
+	cornerSize: 14,
+	lockScalingFlip: true
 }
 const DEFAULT_RECT_COLORS = ["f4f1de", "e07a5f", "3d405b", "81b29a", "f2cc8f"]
 
@@ -250,6 +251,7 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 	canvas.setBackgroundColor({ source: inlineSVGString(tileSvgString) }, canvasBgCallback)
 }
 
+console.log(fabric.Rect.prototype, ObjectFit.prototype, typeof fabric.Rect.prototype, typeof ObjectFit.prototype)
 Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 
 // credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL

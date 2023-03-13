@@ -2,8 +2,8 @@ import { fabricCanvasExtended } from './canvas';
 import { IPosition, IPoint, Point } from 'fabricjs-object-fit';
 import { fabric } from 'fabric';
 // import { inlineSVGString } from './canvas';
-import topArrowIcon from './icons/alignTop.svg';
-import centerIcon from './icons/alignCenter.svg';
+import halfCircleIcon from './icons/halfCircleTop.svg';
+// import centerIcon from './icons/alignCenter.svg';
 
 // helper functions for the active object
 
@@ -42,7 +42,6 @@ type ControlIconOpts = { xOffset?: number, yOffset?: number, size?: number, colo
  * modifies the context in-place
  */
 class IconRenderer {
-	// FIXME renderBgCircle is not clickable - possibly convert them to svgs
 	// TODO invert icon that corresponds to currently selected x and y pos - for rect fallback to default icon, doesen't matter anyway
 
 	/** render a background circle for the control */
@@ -150,7 +149,7 @@ class IconRenderer {
 	}
 }
 
-function renderIcon(iconInlineString: string, rotateDeg: number = 0, size: number = 24) {
+function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 	const iconSvg = document.createElement("img")
 	iconSvg.src = iconInlineString
 	return function renderIcon(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object) {
@@ -180,7 +179,7 @@ export function customObjectFitControls() {
 	const TopYControl = new fabric.Control({
 		...yControlOpts,
 		offsetY: -offset*1.5,
-		render: renderIcon(topArrowIcon),
+		render: renderIcon(halfCircleIcon),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPosRel(target.canvas, 'y', Point.Y.TOP)
 			return true;
@@ -188,7 +187,7 @@ export function customObjectFitControls() {
 	})
 	const MiddleYControl = new fabric.Control({
 		...yControlOpts,
-		render: renderIcon(centerIcon),
+		// render: renderIcon(centerIcon),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPosRel(target.canvas, 'y', Point.Y.CENTER)
 			return true;
@@ -197,7 +196,7 @@ export function customObjectFitControls() {
 	const BottomYControl = new fabric.Control({
 		...yControlOpts,
 		offsetY: offset*1.5,
-		render: renderIcon(topArrowIcon, 180),
+		render: renderIcon(halfCircleIcon, 180),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPosRel(target.canvas, 'y', Point.Y.BOTTOM)
 			return true;
@@ -208,7 +207,7 @@ export function customObjectFitControls() {
 	const LeftXControl = new fabric.Control({
 		...xControlOpts,
 		offsetX: -offset*1.5,
-		render: renderIcon(topArrowIcon, 270),
+		render: renderIcon(halfCircleIcon, 270),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPosRel(target.canvas, 'x', Point.X.LEFT)
 			return true;
@@ -216,7 +215,7 @@ export function customObjectFitControls() {
 	})
 	const MiddleXControl = new fabric.Control({
 		...xControlOpts,
-		render: renderIcon(centerIcon),
+		// render: renderIcon(centerIcon),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPosRel(target.canvas, 'x', Point.X.CENTER)
 			return true;
@@ -225,7 +224,7 @@ export function customObjectFitControls() {
 	const RightXControl = new fabric.Control({
 		...xControlOpts,
 		offsetX: offset*1.5,
-		render: renderIcon(topArrowIcon, 90),
+		render: renderIcon(halfCircleIcon, 90),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPosRel(target.canvas, 'x', Point.X.RIGHT)
 			return true;

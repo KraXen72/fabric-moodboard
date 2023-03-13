@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="24mm"
+   height="24mm"
+   viewBox="0 0 24 24"
+   version="1.1"
+   id="svg826"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="halfCircleTop.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview828"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="5.3664983"
+     inkscape:cx="14.441447"
+     inkscape:cy="47.237507"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g2146" />
+  <defs
+     id="defs823" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g2110"
+       transform="rotate(-90,12,12)">
+      <g
+         id="g2146"
+         transform="matrix(0.95832796,0,0,0.95833304,0.5001284,0.50000375)">
+        <path
+           id="path909"
+           style="fill:#b2ccff;fill-opacity:1;stroke:#b2ccff;stroke-width:0;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 12.000001,5.8156312e-7 V 24 A 12.000009,12.000008 0 0 0 24,12 12.000009,12.000008 0 0 0 12.000001,5.8156312e-7 Z" />
+        <path
+           id="path909-4"
+           style="fill:#000000;fill-opacity:1;stroke:#b2ccff;stroke-width:1.53304;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 11.494284,23.233483 V 0.76651592 A 10.72791,11.233492 0 0 0 0.76638134,11.999999 10.72791,11.233492 0 0 0 11.494284,23.233483 Z" />
+      </g>
+    </g>
+  </g>
+</svg>
