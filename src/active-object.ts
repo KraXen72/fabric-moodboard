@@ -2,7 +2,7 @@ import { fabricCanvasExtended } from './canvas';
 import { IPosition, IPoint, Point } from 'fabricjs-object-fit';
 import { fabric } from 'fabric';
 // import { inlineSVGString } from './canvas';
-import halfCircleIcon from './icons/halfCircleTop.svg';
+import upArrow from './icons/upArrow.svg';
 import { precisionRound } from './utils';
 // import centerIcon from './icons/alignCenter.svg';
 
@@ -21,7 +21,7 @@ export function scaleToAspectRatio(canvas: fabricCanvasExtended, adjust: 'width'
 	canvas.requestRenderAll()
 }
 
-/** update active ObjectFIt's position by relative  */
+/** update active ObjectFIt's position  */
 export function updateActiveObjPos(canvas: fabricCanvasExtended, key: keyof Partial<IPosition>, value: IPoint) {
 	const _active = canvas.getActiveObject() as IObjectFitFull
 	if (_active.type !== "objectFit") return;
@@ -30,52 +30,54 @@ export function updateActiveObjPos(canvas: fabricCanvasExtended, key: keyof Part
 	canvas.requestRenderAll()
 }
 
-/** 
- * resolve fabric-object-fit's points into a 0-1 decimal scale: 0 top, 0.5 middle, 1 bottom, etc.
- * if it returned -1, something is wrong; investigate
- */
-export function resolvePointToDecimal(point: IPoint): number {
+/** resolve fabric-object-fit's points into a 0-1 decimal scale: 0 top, 0.5 middle, 1 bottom, etc. */
+export function resolvePointToDecimal(point: IPoint): SmallRange {
 	const strPoint = point.toString()
 	console.log(point, strPoint)
 	if (strPoint.startsWith("Point.Y")) {
 		switch (strPoint) {
-			case "Point.Y.TOP": return 0;
-			case "Point.Y.CENTER": return 0.5;
-			case "Point.Y.BOTTOM": return 1;
-			default: return -1;
+			case "Point.Y.TOP": return 0 as SmallRange;
+			case "Point.Y.CENTER": return 0.5 as SmallRange;
+			case "Point.Y.BOTTOM": return 1 as SmallRange;
+			default: throw new Error(`resolvePointToDecimal: unhandled '${strPoint}'`);;
 		}
 	} else if (strPoint.startsWith("Point.X")) {
 		switch (strPoint) {
-			case "Point.X.LEFT": return 0;
-			case "Point.X.CENTER": return 0.5;
-			case "Point.X.RIGHT": return 1;
-			default: return -1;
+			case "Point.X.LEFT": return 0 as SmallRange;
+			case "Point.X.CENTER": return 0.5 as SmallRange;
+			case "Point.X.RIGHT": return 1 as SmallRange;
+			default: throw new Error(`resolvePointToDecimal: unhandled '${strPoint}'`);
 		}
 	} else if (strPoint.startsWith("Point.fromPercentage")) {
 		let value = point.toJSON().args[0] // in percentage string | number
 		if (typeof value === "string") value = parseInt(value.trim()) // in percentage, number
 		const finalVal = precisionRound(value / 100, 2) // 1way value: 100 => 1, 50 => 0.5, 22 => 0.22
 		console.log(value, finalVal)
-		return finalVal;
+		return finalVal as SmallRange;
 	} else {
-		return -1;
+		throw new Error(`resolvePointToDecimal: unhandled '${strPoint}'`);
 	}
 }
+
+/** range of numbers from -1 to 1. used for tweakPane granual controls, so whole 2D point area is used */
+type BigRange = number & { readonly __rangeType: '(-1, 1)' }
+/** range of numbers from 0 to 1. used for converting Bigrange into percentage (* 100) for setting x and y with Point.fromPercentage */
+type SmallRange = number & { readonly __rangeType: '(0, 1)' }
  
 /** converts from (-1 to 1) range into (0 to 1) range */
-export function convert2wayRangeTo1(num: number, precision = 2) {
-	return precisionRound(precisionRound(num + 1, precision) / 2, precision) 
+export function convertBigRangeToSmall(num: BigRange | number, precision = 2): SmallRange {
+	return precisionRound(precisionRound((num as number)+ 1, precision) / 2, precision) as SmallRange
 }
 
 /** converts from (0 to 1) range into (-1 to 1) range */
-export function convert1wayRangeTo2(num: number, precision = 2) {
-	return precisionRound(precisionRound(num * 2, precision) - 1, precision) 
+export function convertSmallRangeToBig(num: SmallRange, precision = 2): BigRange {
+	return precisionRound(precisionRound((num as number) * 2, precision) - 1, precision) as BigRange 
 }
 
 function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 	const iconSvg = document.createElement("img")
 	iconSvg.src = iconInlineString
-	return function renderIcon(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object) {
+	return function(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object) {
 		const size = __.cornerSize;
 		ctx.save();
 		ctx.translate(left, top);
@@ -84,6 +86,10 @@ function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 		ctx.restore();
 	}
 }
+
+// function mouseUpHandler(key: 'x' | 'y', point: IPoint) {
+// 	return function 
+// }
 
 export const customControls = [
 	"TopYControl",
@@ -101,7 +107,7 @@ export function customObjectFitControls() {
 	const TopYControl = new fabric.Control({
 		...yControlOpts,
 		offsetY: -offset*1.5,
-		render: renderIcon(halfCircleIcon),
+		render: renderIcon(upArrow),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPos(target.canvas, 'y', Point.Y.TOP)
 			return true;
@@ -118,7 +124,7 @@ export function customObjectFitControls() {
 	const BottomYControl = new fabric.Control({
 		...yControlOpts,
 		offsetY: offset*1.5,
-		render: renderIcon(halfCircleIcon, 180),
+		render: renderIcon(upArrow, 180),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPos(target.canvas, 'y', Point.Y.BOTTOM)
 			return true;
@@ -129,7 +135,7 @@ export function customObjectFitControls() {
 	const LeftXControl = new fabric.Control({
 		...xControlOpts,
 		offsetX: -offset*1.5,
-		render: renderIcon(halfCircleIcon, 270),
+		render: renderIcon(upArrow, 270),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPos(target.canvas, 'x', Point.X.LEFT)
 			return true;
@@ -146,7 +152,7 @@ export function customObjectFitControls() {
 	const RightXControl = new fabric.Control({
 		...xControlOpts,
 		offsetX: offset*1.5,
-		render: renderIcon(halfCircleIcon, 90),
+		render: renderIcon(upArrow, 90),
 		mouseUpHandler: (_eventData, { target }) => {
 			updateActiveObjPos(target.canvas, 'x', Point.X.RIGHT)
 			return true;

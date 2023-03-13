@@ -2,7 +2,7 @@ import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
 import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
-import { convert2wayRangeTo1, convert1wayRangeTo2, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
+import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
 
 const toolbar = document.getElementById("toolbar")
@@ -77,8 +77,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		if (isObjFit) {
 			const __ = _activeObj as IObjectFitFull
 			activeObjGranularPosition = { position: { 
-				x: convert1wayRangeTo2(resolvePointToDecimal(__.position.x)),
-				y: convert1wayRangeTo2(resolvePointToDecimal(__.position.y))
+				x: convertSmallRangeToBig(resolvePointToDecimal(__.position.x)),
+				y: convertSmallRangeToBig(resolvePointToDecimal(__.position.y))
 			}};
 			setUpActiveObjectControls(_activeObj as IObjectFitFull)
 		}
@@ -119,8 +119,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 			expanded: true
 		}).on('change', throttle((ev: TpChangeEvent<{x: number, y: number}>) => {
 			const value = { x: precisionRound(ev.value.x, 2), y: precisionRound(ev.value.y, 2) }
-			updateActiveObjPos(canvas, 'x', Point.fromPercentage(convert2wayRangeTo1(value.x) * 100))
-			updateActiveObjPos(canvas, 'y', Point.fromPercentage(convert2wayRangeTo1(value.y) * 100))
+			updateActiveObjPos(canvas, 'x', Point.fromPercentage(convertBigRangeToSmall(value.x) * 100))
+			updateActiveObjPos(canvas, 'y', Point.fromPercentage(convertBigRangeToSmall(value.y) * 100))
 		}, 16))
 		granularPositionControls.addButton({ title: 'Reset original position' }).on('click', () => {
 			const _active = canvas.getActiveObject() as IObjectFitFull
@@ -152,6 +152,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		if (input.files.length === 0) return;
 		readAndAddImage(canvas, input.files[0], appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
 	})
+
+	return refreshActiveObjectControls
 }
 
 export function clearFileReader() { 
