@@ -28,7 +28,6 @@ const DEFAULT_RECT_COLORS = ["f4f1de", "e07a5f", "3d405b", "81b29a", "f2cc8f"]
 
 const { ObjectFit } = setup(fabric)
 
-//https://stackoverflow.com/questions/1248081/how-to-get-the-browser-viewport-dimensions#8876069
 const getViewportWidth = () => Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
 const getViewportHeight = () => Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
 
@@ -252,21 +251,6 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 }
 
 Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
-
-/* type preProcessOptions = { addControls: boolean }
-function _preprocessObject(object: fabric.Object, opts: preProcessOptions = { addControls: true }) {
-	if (opts.addControls) {
-		console.log("adding controls!")
-		
-		// ${materialIconsSvgStyleTag}
-		
-		
-		object.controls.XTop = 
-	}
-	return object
-} */
-
-
 
 // credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
