@@ -66,7 +66,7 @@ type SmallRange = number & { readonly __rangeType: '(0, 1)' }
  
 /** converts from (-1 to 1) range into (0 to 1) range */
 export function convertBigRangeToSmall(num: BigRange | number, precision = 2): SmallRange {
-	return precisionRound(precisionRound((num as number)+ 1, precision) / 2, precision) as SmallRange
+	return precisionRound(precisionRound((num as number) + 1, precision) / 2, precision) as SmallRange
 }
 
 /** converts from (0 to 1) range into (-1 to 1) range */
@@ -87,9 +87,12 @@ function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 	}
 }
 
-// function mouseUpHandler(key: 'x' | 'y', point: IPoint) {
-// 	return function 
-// }
+function clickHandler(key: 'x' | 'y', point: IPoint) {
+	return function(_eventData: MouseEvent, { target }: fabric.Transform) {
+		updateActiveObjPos(target.canvas, key, point)
+		return true;
+	}
+}
 
 export const customControls = [
 	"TopYControl",
@@ -108,27 +111,18 @@ export function customObjectFitControls() {
 		...yControlOpts,
 		offsetY: -offset*1.5,
 		render: renderIcon(upArrow),
-		mouseUpHandler: (_eventData, { target }) => {
-			updateActiveObjPos(target.canvas, 'y', Point.Y.TOP)
-			return true;
-		}
+		mouseUpHandler: clickHandler('y', Point.Y.TOP)
 	})
 	const MiddleYControl = new fabric.Control({
 		...yControlOpts,
 		// render: renderIcon(centerIcon),
-		mouseUpHandler: (_eventData, { target }) => {
-			updateActiveObjPos(target.canvas, 'y', Point.Y.CENTER)
-			return true;
-		}
+		mouseUpHandler: clickHandler('y', Point.Y.CENTER)
 	})
 	const BottomYControl = new fabric.Control({
 		...yControlOpts,
 		offsetY: offset*1.5,
 		render: renderIcon(upArrow, 180),
-		mouseUpHandler: (_eventData, { target }) => {
-			updateActiveObjPos(target.canvas, 'y', Point.Y.BOTTOM)
-			return true;
-		}
+		mouseUpHandler: clickHandler('y', Point.Y.BOTTOM)
 	})
 
 	const xControlOpts = { x: 0, y: -0.5, offsetY: -offset }
@@ -136,27 +130,18 @@ export function customObjectFitControls() {
 		...xControlOpts,
 		offsetX: -offset*1.5,
 		render: renderIcon(upArrow, 270),
-		mouseUpHandler: (_eventData, { target }) => {
-			updateActiveObjPos(target.canvas, 'x', Point.X.LEFT)
-			return true;
-		}
+		mouseUpHandler: clickHandler('x', Point.X.LEFT)
 	})
 	const MiddleXControl = new fabric.Control({
 		...xControlOpts,
 		// render: renderIcon(centerIcon),
-		mouseUpHandler: (_eventData, { target }) => {
-			updateActiveObjPos(target.canvas, 'x', Point.X.CENTER)
-			return true;
-		}
+		mouseUpHandler: clickHandler('x', Point.X.CENTER)
 	})
 	const RightXControl = new fabric.Control({
 		...xControlOpts,
 		offsetX: offset*1.5,
 		render: renderIcon(upArrow, 90),
-		mouseUpHandler: (_eventData, { target }) => {
-			updateActiveObjPos(target.canvas, 'x', Point.X.RIGHT)
-			return true;
-		}
+		mouseUpHandler: clickHandler('x', Point.X.RIGHT)
 	})
 	return {
 		TopYControl,
