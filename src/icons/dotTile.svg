@@ -1,0 +1,30 @@
+<!-- 2.3162842e-08 -->
+<svg width="32" height="32" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <defs/>
+  <g>
+    <circle
+       style="fill:#ffffff;stroke:#9d5867;stroke-width:0;"
+       id="path-circle-top-right"
+       cx="32"
+       cy="-2"
+       r="2" />
+    <circle
+       style="fill:#ffffff;stroke:#9d5867;stroke-width:0;"
+       id="path-circle-top-left"
+       cx="-2"
+       cy="-2"
+       r="2" />
+    <circle
+       style="fill:#ffffff;stroke:#9d5867;stroke-width:0;"
+       id="path-circle-bottom-right"
+       cx="32"
+       cy="32"
+       r="2" />
+    <circle
+       style="fill:#ffffff;stroke:#9d5867;stroke-width:0;"
+       id="path-circle-bottom-lefet"
+       cx="-2"
+       cy="32"
+       r="2" />
+  </g>
+</svg>
