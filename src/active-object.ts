@@ -28,127 +28,6 @@ export function updateActiveObjPosRel(canvas: fabricCanvasExtended, key: keyof P
 	canvas.requestRenderAll()
 }
 
-// custom controls - pain & suffering
-// credit to after countless hours of trying to get this to work to Signal Desktop App
-// - rendering a custom simple icon through canvas ctx (modified the x icon)
-// - extending the Object.prototype of a class that already extends a fabric.Object
-// https://github.com/signalapp/Signal-Desktop
-// https://github.com/signalapp/Signal-Desktop/blob/main/ts/mediaEditor/util/customFabricObjectControls.ts
-
-type ControlIconOpts = { xOffset?: number, yOffset?: number, size?: number, color?: string }
-
-/**
- * class that houses methods for drawing icons with the low-level canvas ctx
- * modifies the context in-place
- */
-class IconRenderer {
-	// TODO invert icon that corresponds to currently selected x and y pos - for rect fallback to default icon, doesen't matter anyway
-
-	/** render a background circle for the control */
-	#renderBgCircle(ctx: CanvasRenderingContext2D, left: number, top: number, opts: ControlIconOpts) {
-		const size = opts?.size ?? 12;
-		const color = opts?.color ?? '#000' //'#667ead'//'#b2ccff' //#000
-
-		ctx.save();
-		ctx.fillStyle = color; //#000
-		ctx.strokeStyle = '#fff';
-		ctx.lineWidth = 1;
-		ctx.beginPath();
-		ctx.arc(left, top, size, 0, 2 * Math.PI, false);
-		ctx.fill();
-		ctx.stroke();
-		ctx.closePath()
-	}
-
-	/** set up the ctx for drawing icons & begin path */
-	#iconSetup(ctx: CanvasRenderingContext2D, left: number, top: number, opts: ControlIconOpts) {
-		this.#renderBgCircle(ctx, left, top, opts)
-		const color = "#fff"//"#000"
-		ctx.fillStyle = color;
-		ctx.strokeStyle = color;
-		ctx.lineWidth = 1
-
-		ctx.beginPath();
-	}
-	#iconCleanup(ctx: CanvasRenderingContext2D) {
-		ctx.stroke();
-		ctx.restore();
-	}
-
-	topArrow(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object, opts: ControlIconOpts ) {
-		const size = opts?.size ? Math.round(opts.size / 3) : 4;
-		this.#iconSetup(ctx, left, top, opts)
-		
-		const topLeft = new fabric.Point(left - size, top - size);
-		// const topRight = new fabric.Point(left + size, top - size);
-		const bottomRight = new fabric.Point(left + size, top + size);
-		const bottomLeft = new fabric.Point(left - size, top + size);
-
-		ctx.moveTo(topLeft.x + size, topLeft.y);
-		ctx.lineTo(bottomRight.x, bottomRight.y)
-		ctx.moveTo(topLeft.x + size, topLeft.y);
-		ctx.lineTo(bottomLeft.x, bottomLeft.y);
-		this.#iconCleanup(ctx)
-	}
-
-	bottomArrow(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object, opts: ControlIconOpts) {
-		const size = opts?.size ? Math.round(opts.size / 3) : 4;
-		this.#iconSetup(ctx, left, top, opts)
-		
-		const topLeft = new fabric.Point(left - size, top - size);
-		const topRight = new fabric.Point(left + size, top - size);
-		// const bottomRight = new fabric.Point(left + size, top + size);
-		const bottomLeft = new fabric.Point(left - size, top + size);
-
-		ctx.moveTo(bottomLeft.x + size, bottomLeft.y);
-		ctx.lineTo(topRight.x, topRight.y)
-		ctx.moveTo(bottomLeft.x + size, bottomLeft.y);
-		ctx.lineTo(topLeft.x, topLeft.y);
-		this.#iconCleanup(ctx)
-	}
-
-	leftArrow(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object, opts: ControlIconOpts ) {
-		const size = opts?.size ? Math.round(opts.size / 3) : 4;
-		this.#iconSetup(ctx, left, top, opts)
-		
-		const topLeft = new fabric.Point(left - size, top - size);
-		const topRight = new fabric.Point(left + size, top - size);
-		const bottomRight = new fabric.Point(left + size, top + size);
-		// const bottomLeft = new fabric.Point(left - size, top + size);
-
-		ctx.moveTo(topRight.x, topRight.y);
-		ctx.lineTo(topLeft.x, topLeft.y + size)
-		ctx.moveTo(bottomRight.x, bottomRight.y);
-		ctx.lineTo(topLeft.x, topLeft.y + size)
-		this.#iconCleanup(ctx)
-	}
-
-	rightArrow(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object, opts: ControlIconOpts ) {
-		const size = opts?.size ? Math.round(opts.size / 3) : 4;
-		this.#iconSetup(ctx, left, top, opts)
-		
-		const topLeft = new fabric.Point(left - size, top - size);
-		const topRight = new fabric.Point(left + size, top - size);
-		// const bottomRight = new fabric.Point(left + size, top + size);
-		const bottomLeft = new fabric.Point(left - size, top + size);
-
-		ctx.moveTo(topLeft.x, topLeft.y);
-		ctx.lineTo(topRight.x, topRight.y + size)
-		ctx.moveTo(bottomLeft.x, bottomLeft.y);
-		ctx.lineTo(topRight.x, topRight.y + size)
-		this.#iconCleanup(ctx)
-	}
-
-	circle(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object, opts: ControlIconOpts ) {
-		const size = opts?.size ? Math.round(opts.size / 3) : 4;
-		this.#iconSetup(ctx, left, top, opts)
-		ctx.beginPath();
-		ctx.arc(left, top, size, 0, 2 * Math.PI, false);
-		ctx.fill();
-		this.#iconCleanup(ctx)
-	}
-}
-
 function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 	const iconSvg = document.createElement("img")
 	iconSvg.src = iconInlineString
@@ -172,7 +51,6 @@ export const customControls = [
 ]
 
 export function customObjectFitControls() {
-	//const iconRenderer = new IconRenderer()
 	const offset = 24
 	const yControlOpts = { x: -0.5, y: 0, offsetX: -offset }
 
