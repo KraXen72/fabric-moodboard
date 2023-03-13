@@ -1,8 +1,9 @@
-import { IObjectFit, FitMode, IFitMode } from 'fabricjs-object-fit';
-import { Pane, BladeApi } from 'tweakpane';
+import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
+import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
-import { scaleToAspectRatio } from './active-object';
+import { convert2wayRangeTo1, convert1wayRangeTo2, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
+import { precisionRound, throttle } from './utils';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
@@ -24,6 +25,8 @@ function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElemen
 	}, { signal })
 }
 
+type WrappedIPositionNumbers = { position: { x: number, y: number } }
+
 export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const pane = new Pane();
 	const topTabs = pane.addTab({
@@ -33,8 +36,10 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		], index: 0
 	})
 	const fitOptions = { cover: FitMode.COVER, contain: FitMode.CONTAIN, 'default (stretch)': FitMode.FILL }
+	const defaultGranularPosition: WrappedIPositionNumbers = { position: { x: 1, y: 1 } } // in 2-way range
 
 	let activeObjControls: BladeApi<any>[] = [] /** reference so they can be disposed of later */
+	let activeObjGranularPosition: WrappedIPositionNumbers = defaultGranularPosition
 	
 	// settings - tab 0
 	const snapToGridFolder = topTabs.pages[0].addFolder({ title: "Snap to Grid" })
@@ -69,7 +74,14 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 
 		activeObjControls.forEach(control => control.dispose())
 		activePartSeparator.hidden = !isObjFit
-		if (isObjFit) setUpActiveObjectControls(_activeObj as IObjectFitFull)
+		if (isObjFit) {
+			const __ = _activeObj as IObjectFitFull
+			activeObjGranularPosition = { position: { 
+				x: convert1wayRangeTo2(resolvePointToDecimal(__.position.x)),
+				y: convert1wayRangeTo2(resolvePointToDecimal(__.position.y))
+			}};
+			setUpActiveObjectControls(_activeObj as IObjectFitFull)
+		}
 		pane.refresh();
 	}
 
@@ -98,7 +110,28 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height") })
 		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width") })
 
-		activeObjControls = [ activeImageFolder, staFolder, /*posSeparator, positionFolder*/ ]
+		const posSeparator = topTabs.pages[1].addSeparator()
+		const granularPositionControls = topTabs.pages[1].addFolder({ title: "Granular Image Position" })
+		granularPositionControls.addInput(activeObjGranularPosition, 'position', {
+			label: 'x, y',
+			x: { min: -1, max: 1} , y: { min: -1, max: 1 },
+			picker: 'inline',
+			expanded: true
+		}).on('change', throttle((ev: TpChangeEvent<{x: number, y: number}>) => {
+			const value = { x: precisionRound(ev.value.x, 2), y: precisionRound(ev.value.y, 2) }
+			updateActiveObjPos(canvas, 'x', Point.fromPercentage(convert2wayRangeTo1(value.x) * 100))
+			updateActiveObjPos(canvas, 'y', Point.fromPercentage(convert2wayRangeTo1(value.y) * 100))
+		}, 16))
+		granularPositionControls.addButton({ title: 'Reset original position' }).on('click', () => {
+			const _active = canvas.getActiveObject() as IObjectFitFull
+			_active.set({ position: { x: Point.X.CENTER, y: Point.Y.CENTER } })
+			_active.recompute()
+			activeObjGranularPosition = defaultGranularPosition
+			pane.refresh()
+			canvas.requestRenderAll()
+		})
+
+		activeObjControls = [ activeImageFolder, staFolder, posSeparator, granularPositionControls ]
 	}
 
 	topTabs.pages[1].addButton({ title: 'Log to console' }).on('click', () => console.log(canvas.getActiveObject()))

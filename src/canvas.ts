@@ -17,6 +17,8 @@ export type viewportBorders = {
 const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 	originX: 'left',
 	originY: 'top',
+	lockSkewingX: true,
+	lockSkewingY: true,
 	lockRotation: true,
 	hasRotatingPoint: false,
 	transparentCorners: false,
@@ -251,7 +253,6 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 	canvas.setBackgroundColor({ source: inlineSVGString(tileSvgString) }, canvasBgCallback)
 }
 
-console.log(fabric.Rect.prototype, ObjectFit.prototype, typeof fabric.Rect.prototype, typeof ObjectFit.prototype)
 Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 
 // credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
