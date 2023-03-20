@@ -9,11 +9,12 @@ const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
 const { signal } = hotkeyController
 
-function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, ev: MouseEvent) => any, title?: string) {
+function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, ev: MouseEvent) => any, title?: string, styleOverride?: Record<string, any>) {
 	const btn = document.createElement('button')
 	btn.onclick = callback
 	btn.innerHTML = `<span class="material-symbols-rounded">${materialIcon}</span>`
 	if (title) btn.title = title
+	if (styleOverride) Object.entries(styleOverride).forEach(([ key, value ]) => btn.style[key as any] = value)
 	toolbar.appendChild(btn)
 	return btn
 }
@@ -25,6 +26,7 @@ function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElemen
 	}, { signal })
 }
 
+/** object fed to tweakpane for granular image position */
 type WrappedIPositionNumbers = { position: { x: number, y: number } }
 
 export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
@@ -114,7 +116,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		const granularPositionControls = topTabs.pages[1].addFolder({ title: "Granular Image Position" })
 		granularPositionControls.addInput(activeObjGranularPosition, 'position', {
 			label: 'x, y',
-			x: { min: -1, max: 1} , y: { min: -1, max: 1 },
+			x: { min: -1, max: 1}, y: { min: -1, max: 1 },
 			picker: 'inline',
 			expanded: true
 		}).on('change', throttle((ev: TpChangeEvent<{x: number, y: number}>) => {
@@ -127,8 +129,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 			_active.set({ position: { x: Point.X.CENTER, y: Point.Y.CENTER } })
 			_active.recompute()
 			activeObjGranularPosition = defaultGranularPosition
-			pane.refresh()
 			canvas.requestRenderAll()
+			refreshActiveObjectControls()
 		})
 
 		activeObjControls = [ activeImageFolder, staFolder, posSeparator, granularPositionControls ]
@@ -144,7 +146,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
 	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
-
+	window.refreshActiveObjectButton = addButton('refresh', refreshActiveObjectControls, "refresh", { display: 'none' })
+	
 	registerHotkey('delete', delBtn)
 	
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 

@@ -26,6 +26,10 @@ declare global {
 			height: number
 		}
 	}
+
+	interface Window {
+		refreshActiveObjectButton: HTMLButtonElement
+	}
 }
 
 export {};

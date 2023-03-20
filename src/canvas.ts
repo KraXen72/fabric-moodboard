@@ -118,7 +118,6 @@ function _newPastePosition(
 					top: obj.top + twin.top + halfH - twin.height - gridGranularity,
 					left: obj.left + twin.left + halfW
 				}
-				break;
 			case "below":
 				return {
 					top: obj.top + twin.top + halfH + twin.height + gridGranularity,
@@ -163,8 +162,6 @@ export function duplicateSelection(canvas: GridSnapCanvas, appSettings: appSetti
 				try { canvas.discardActiveObject() } catch (e) { }
 				canvas.setActiveObject(clone)
 			} else {
-				console.log("original", toClone, "new", clonedObjects)
-
 				const active = canvas.getActiveObject()
 				active.set({ originX: 'left', originY: 'top' })
 				active.setCoords()

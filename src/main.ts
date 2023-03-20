@@ -27,6 +27,9 @@ canvas.gridGranularity = GRID_SIZE
 canvas.cfg_smoothSnapping = false
 
 document.body.style.setProperty("--dot-spacing", `${GRID_SIZE}px`)
+window.refreshActiveObjectButton = Object.assign(document.createElement('button'), { 
+	onclick: () => { console.warn("toolbar not initialized! can't refresh it") } 
+})
 initDotMatrix(canvas, GRID_SIZE) // initialize dotmatrix background through svg's
 const viewportBorders = drawViewportBorders(canvas) // draw current viewport with lines originating in [0, 0]
 
@@ -73,6 +76,7 @@ function _updateCustomControlsVisiblity(object: fabric.Object) {
 // remove most controls from selections, because we don't want users to be able to resize them - it messes with the grid
 const selectionControls = { bl: false, br: false, tl: false, tr: false, mtr: false}
 function selectionCallback(e: fabric.IEvent<MouseEvent>) {
+	window.refreshActiveObjectButton.click()
 	const active = canvas.getActiveObject()
 	_updateCustomControlsVisiblity(active)
 	if (!(e.selected.length !== 1 || active.hasOwnProperty('_objects'))) return;
@@ -87,6 +91,7 @@ function selectionCallback(e: fabric.IEvent<MouseEvent>) {
 }
 
 function selectionUpdatedCallback() {
+	window.refreshActiveObjectButton.click()
 	_updateCustomControlsVisiblity(canvas.getActiveObject())
 	if (canvas.getActiveObject().type !== 'activeSelection') return;
 	if (!canvas.cfg_snapOnResize) return;
@@ -104,7 +109,13 @@ function selectionUpdatedCallback() {
 	canvas.requestRenderAll()
 }
 
+function selectionClearedCallback() {
+	window.refreshActiveObjectButton.click()
+}
+
 canvas.on("selection:created", selectionCallback)
 canvas.on("selection:updated", selectionUpdatedCallback)
+canvas.on("selection:cleared", selectionClearedCallback)
+
 initToolbar(canvas, APP_SETTINGS)
 canvas.add(createRect(GRID_SIZE, { canvas }))

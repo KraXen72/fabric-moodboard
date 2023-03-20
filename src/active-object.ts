@@ -33,7 +33,7 @@ export function updateActiveObjPos(canvas: fabricCanvasExtended, key: keyof Part
 /** resolve fabric-object-fit's points into a 0-1 decimal scale: 0 top, 0.5 middle, 1 bottom, etc. */
 export function resolvePointToDecimal(point: IPoint): SmallRange {
 	const strPoint = point.toString()
-	console.log(point, strPoint)
+	// console.log(point, strPoint)
 	if (strPoint.startsWith("Point.Y")) {
 		switch (strPoint) {
 			case "Point.Y.TOP": return 0 as SmallRange;
@@ -52,7 +52,6 @@ export function resolvePointToDecimal(point: IPoint): SmallRange {
 		let value = point.toJSON().args[0] // in percentage string | number
 		if (typeof value === "string") value = parseInt(value.trim()) // in percentage, number
 		const finalVal = precisionRound(value / 100, 2) // 1way value: 100 => 1, 50 => 0.5, 22 => 0.22
-		console.log(value, finalVal)
 		return finalVal as SmallRange;
 	} else {
 		throw new Error(`resolvePointToDecimal: unhandled '${strPoint}'`);
@@ -90,6 +89,7 @@ function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 function clickHandler(key: 'x' | 'y', point: IPoint) {
 	return function(_eventData: MouseEvent, { target }: fabric.Transform) {
 		updateActiveObjPos(target.canvas, key, point)
+		window.refreshActiveObjectButton.click()
 		return true;
 	}
 }
