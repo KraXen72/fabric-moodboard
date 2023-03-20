@@ -3,7 +3,7 @@ import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
-import { precisionRound, throttle } from './utils';
+import { debounce, precisionRound, throttle } from './utils';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
@@ -20,10 +20,18 @@ function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, e
 }
 export const materialIconsSvgStyleTag = `<style>@font-face { font-family: 'MaterialSymbolsRounded'; font-style: normal; font-weight: 300; src: url('material-symbols-rounded-thin-specific.woff2') format('woff2'); }</style>`
 
+type Hotkey = { code: KeyboardEvent['code'], button: HTMLButtonElement }
+const registeredHotkeys: Hotkey[] = []
+
+document.addEventListener('keyup', (ev: KeyboardEvent) => {
+	for (let i = 0; i < registeredHotkeys.length; i++) {
+		const hotkey = registeredHotkeys[i];
+		if (ev.code.toLowerCase() === hotkey.code.toLowerCase() && document.activeElement === document.body) hotkey.button.click()
+	}
+}, { signal })
+
 function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElement) {
-	document.addEventListener('keyup', (ev) => { 
-		if (ev.code.toLowerCase() === keycode.toLowerCase() && document.activeElement === document.body) button.click()
-	}, { signal })
+	registeredHotkeys.push({ code: keycode, button})
 }
 
 /** object fed to tweakpane for granular image position */
@@ -148,6 +156,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
 	window.refreshActiveObjectButton = addButton('refresh', refreshActiveObjectControls, "refresh", { display: 'none' })
 	
+	registerHotkey('keya', newRectBtn)
+	registerHotkey('keyd', cloneBtn)
 	registerHotkey('delete', delBtn)
 	
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
