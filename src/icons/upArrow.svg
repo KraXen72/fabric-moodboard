@@ -1,67 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="24mm"
-   height="24mm"
-   viewBox="0 0 24 24"
-   version="1.1"
-   id="svg826"
-   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
-   sodipodi:docname="upArrow.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview828"
-     pagecolor="#505050"
-     bordercolor="#ffffff"
-     borderopacity="1"
-     inkscape:pageshadow="0"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="1"
-     inkscape:document-units="mm"
-     showgrid="false"
-     inkscape:zoom="5.3664983"
-     inkscape:cx="14.441447"
-     inkscape:cy="47.237507"
-     inkscape:window-width="2560"
-     inkscape:window-height="1377"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="g2146" />
-  <defs
-     id="defs823" />
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1">
-    <g
-       id="g2110"
-       transform="rotate(-90,12,12)">
-      <g
-         id="g2146"
-         transform="matrix(0.95832796,0,0,0.95833304,0.5001284,0.50000375)">
-        <path
-           sodipodi:type="star"
-           style="fill:#b2ccff;stroke:#b2ccff;stroke-width:5.66929;stroke-linecap:square;fill-opacity:1"
-           id="path2109"
-           inkscape:flatsided="false"
-           sodipodi:sides="3"
-           sodipodi:cx="6.8946261"
-           sodipodi:cy="83.667221"
-           sodipodi:r1="90.113869"
-           sodipodi:r2="45.056934"
-           sodipodi:arg1="-1.5707963"
-           sodipodi:arg2="-0.52359878"
-           inkscape:rounded="0"
-           inkscape:randomized="0"
-           d="m 6.8946286,-6.4466476 39.0204474,67.5854016 39.020448,67.585406 -78.0408977,0 -78.0409013,-1e-5 39.020451,-67.585396 z"
-           transform="matrix(0,0.15080564,-0.15080643,0,21.006309,10.960251)"
-           inkscape:transform-center-y="-3.2558597" />
-      </g>
-    </g>
-  </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24mm" height="24mm" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+	<defs/>
+	<g transform="rotate(-90,12,12)">
+		<g transform="matrix(.95833 0 0 .95833 .50013 .5)">
+		<path transform="matrix(0 .15081 -.15081 0 21.006 10.96)" d="m6.8946-6.4466 78.041 135.17h-78.041l-78.041-1e-5 39.02-67.585z" fill="#b2ccff" stroke="#b2ccff" stroke-linecap="square" stroke-width="5.6693"/>
+		</g>
+	</g>
 </svg>
