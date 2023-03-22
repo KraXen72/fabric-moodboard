@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import { ILineOptions } from "fabric/fabric-impl";
 import { setup } from "fabricjs-object-fit";
+import { APP_SETTINGS } from './main';
 import { customObjectFitControls } from "./active-object";
 import { GridSnapCanvas } from "./grid-snap-canvas";
 import { clearFileReader } from "./ui-toolbar";
@@ -259,13 +260,10 @@ Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
 // both further modified by KraXen72
 export function readAndAddImage(canvas: GridSnapCanvas, files: FileList, mode: coverContain = "cover", cellsSize = 10) {
-
-	Array.from(files).slice(0, 5).forEach(async (file) => {
+	Array.from(files).slice(0, APP_SETTINGS.maxImagesAtOnce).forEach(async (file) => {
 		let imgElement = new Image();
 		imgElement.src = await blobToData(file)
-
 		imgElement.onload = () => {
-
 			const vw = imgElement.naturalWidth
 			const vh = imgElement.naturalHeight
 			const imageSize = canvas.gridGranularity * cellsSize

@@ -6,7 +6,7 @@ import { IEvent } from 'fabric/fabric-impl';
 import { debounce } from './utils';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, createRect } from './canvas';
-import { initToolbar } from './ui-toolbar';
+import { initToolbar, updateFileReaderMaxImages } from './ui-toolbar';
 import { customControls } from './active-object';
 
 const GRID_SIZE = 32 //grid size in px
@@ -16,7 +16,8 @@ export const APP_SETTINGS: appSettings = {
 	pasteDirection: 'right',
 	allowResizeSelection: false,
 	defaultFitMode: 'cover',
-	defaultImageCellSize: 10
+	defaultImageCellSize: 10,
+	maxImagesAtOnce: 5
 }
 
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
@@ -118,4 +119,5 @@ canvas.on("selection:updated", selectionUpdatedCallback)
 canvas.on("selection:cleared", selectionClearedCallback)
 
 initToolbar(canvas, APP_SETTINGS)
+updateFileReaderMaxImages()
 canvas.add(createRect(GRID_SIZE, { canvas }))

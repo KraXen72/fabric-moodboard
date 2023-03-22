@@ -4,10 +4,15 @@ import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImage as readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
+import { APP_SETTINGS } from './main';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
 const { signal } = hotkeyController
+
+export function updateFileReaderMaxImages() {
+	document.body.style.setProperty("maximages", `${APP_SETTINGS.maxImagesAtOnce}`)
+}
 
 function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, ev: MouseEvent) => any, title?: string, styleOverride?: Record<string, any>) {
 	const btn = document.createElement('button')
@@ -25,13 +30,11 @@ document.addEventListener('keyup', (ev: KeyboardEvent) => {
 	for (let i = 0; i < registeredHotkeys.length; i++) {
 		const hotkey = registeredHotkeys[i];
 		const executeHotkey = () => {
-			if (hotkey.constraints.preventDefault === true) { 
+			if (hotkey?.constraints?.preventDefault === true ?? false) { 
 				ev.preventDefault()
 				window.getSelection().removeAllRanges()
-				console.log("prevd", hotkey, hotkey.constraints)
 			}
 			hotkey.button.click()
-			console.log(hotkey)
 		}
 		if (ev.code.toLowerCase() === hotkey.code.toLowerCase() && document.activeElement === document.body) {
 			if (typeof hotkey.constraints !== "undefined" && hotkey.constraints) {
@@ -61,7 +64,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const pane = new Pane();
 	const topTabs = pane.addTab({
 		pages: [
-			{title: 'Canvas'},
+			{title: 'Settings'},
 			{title: 'Current Object'}
 		], index: 0
 	})
@@ -81,6 +84,11 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const imageFolder = topTabs.pages[0].addFolder({ title: 'Images (defaults)' })
 	imageFolder.addInput(appSettings, 'defaultFitMode', { label: 'fit-mode', options: fitOptions})
 	imageFolder.addInput(appSettings, 'defaultImageCellSize', { label: 'size(cell)', min: 3, max: 20, step: 1 })
+	topTabs.pages[0].addSeparator()
+
+	const imageAddFolder = topTabs.pages[0].addFolder({ title: 'Loading multiple images at once' })
+	imageAddFolder.addInput(appSettings, 'maxImagesAtOnce', { label: 'max', min: 1, max: 20, step: 1 })
+		.on('change', () => updateFileReaderMaxImages())
 	topTabs.pages[0].addSeparator()
 
 	const cloneFolder = topTabs.pages[0].addFolder({ title: 'When duplicating, the new object'})

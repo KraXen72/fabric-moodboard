@@ -61,7 +61,7 @@ body { overflow: hidden; }
 #filereader::after {
 	pointer-events: none;
 	z-index: 2;
-	content: "Pick/Drop Image(s)(max 5)";
+	content: 'Pick/Drop Image(s)';
 	color: #a3a5aa;
 	border: 2px dashed #a3a5aa;
 	border-radius: 6px;
@@ -118,8 +118,6 @@ body .tp-dfwv {
 .tp-dfwv::selection, .tp-dfwv *::selection {
 	background-color: transparent !important;
 }
-
-
 
 
 /* button {

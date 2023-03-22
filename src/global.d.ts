@@ -5,7 +5,8 @@ declare global {
 		pasteDirection: 'right' | 'left' | 'above' | 'below',
 		defaultFitMode: 'cover' | 'contain',
 		defaultImageCellSize: number,
-		allowResizeSelection: boolean
+		allowResizeSelection: boolean,
+		maxImagesAtOnce: number
 	}
 	
 	type scalingEvent = {
@@ -20,7 +21,7 @@ declare global {
 	type IObjectFitFull = IObjectFit & { 
 		handleRecomputeOnScaled?: Function, 
 		handleRecomputeOnScaling?: Function
-		// added by me
+		// added by mev
 		originalImageDimensions?: {
 			width: number,
 			height: number
