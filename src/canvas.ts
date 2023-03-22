@@ -63,8 +63,6 @@ export function removeActiveObject(canvas: fabricCanvasExtended) {
 	if (activeObjLength > 1) canvas.discardActiveObject()
 }
 
-type postProcessOptions = { cleanup: boolean, setDefaults: boolean }
-
 /** do some post / pre processing on an object. like set rounded corners, default, values, cleanup, etc... */
 function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { cleanup: false, setDefaults: false }) {
 	if (opts.setDefaults) object.set(DEFAULT_RECT_OPTS) //@ts-ignore-next-line, ts doesen't like untyped deleting of props from objects
@@ -73,8 +71,6 @@ function _postprocessObject(object: fabric.Object, opts: postProcessOptions = { 
 	object.setControlsVisibility({ mtr: false })
 	return object
 }
-
-type selectionShimOrTwin = { top: number, left: number, width: number, height: number, scaleX: number, scaleY: number, [key: string]: any }
 
 /** 
  * calculate the top & left depeding on selectionShim, object & paste direction

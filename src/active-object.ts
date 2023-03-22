@@ -57,11 +57,6 @@ export function resolvePointToDecimal(point: IPoint): SmallRange {
 		throw new Error(`resolvePointToDecimal: unhandled '${strPoint}'`);
 	}
 }
-
-/** range of numbers from -1 to 1. used for tweakPane granual controls, so whole 2D point area is used */
-type BigRange = number & { readonly __rangeType: '(-1, 1)' }
-/** range of numbers from 0 to 1. used for converting Bigrange into percentage (* 100) for setting x and y with Point.fromPercentage */
-type SmallRange = number & { readonly __rangeType: '(0, 1)' }
  
 /** converts from (-1 to 1) range into (0 to 1) range */
 export function convertBigRangeToSmall(num: BigRange | number, precision = 2): SmallRange {

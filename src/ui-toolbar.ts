@@ -19,7 +19,6 @@ function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, e
 	return btn
 }
 
-type Hotkey = { code: KeyboardEvent['code'], button: HTMLButtonElement }
 const registeredHotkeys: Hotkey[] = []
 
 document.addEventListener('keyup', (ev: KeyboardEvent) => {
@@ -32,9 +31,6 @@ document.addEventListener('keyup', (ev: KeyboardEvent) => {
 function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElement) {
 	registeredHotkeys.push({ code: keycode, button})
 }
-
-/** object fed to tweakpane for granular image position */
-type WrappedIPositionNumbers = { position: { x: number, y: number } }
 
 export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const pane = new Pane();
