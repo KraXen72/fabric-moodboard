@@ -39,7 +39,13 @@ declare global {
 	type selectionShimOrTwin = { top: number, left: number, width: number, height: number, scaleX: number, scaleY: number, [key: string]: any }
 
 	// ui-toolbar
-	type HotkeyConstraints = { exclusive: boolean, ctrlKey: boolean, shiftKey: boolean }
+	type HotkeyConstraints = { 
+		exclusive?: boolean, 
+		ctrlKey?: boolean, 
+		shiftKey?: boolean,
+		altKey?: boolean,
+		preventDefault?: boolean
+	}
 	type Hotkey = { 
 		code: KeyboardEvent['code'],
 		button: HTMLButtonElement, 

@@ -56,6 +56,13 @@ export function resetViewportTransform(canvas: fabricCanvasExtended) {
 	canvas.requestRenderAll();
 }
 
+const selectAllBlacklist = ['line']
+export function selectAllInCanvas(canvas: fabricCanvasExtended) {
+	canvas.discardActiveObject();
+	canvas.setActiveObject(new fabric.ActiveSelection(canvas.getObjects().filter(o => !selectAllBlacklist.includes(o.type) ), { canvas }));
+	canvas.requestRenderAll();
+}
+
 /** remove the current activeObject or even selection */
 export function removeActiveObject(canvas: fabricCanvasExtended) {
 	const activeObjLength = canvas.getActiveObjects().length

@@ -1,7 +1,7 @@
 import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
 import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
-import { createRect, duplicateSelection, readAndAddImage as readAndAddImages, removeActiveObject, resetViewportTransform } from './canvas';
+import { createRect, duplicateSelection, readAndAddImage as readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
 
@@ -24,12 +24,37 @@ const registeredHotkeys: Hotkey[] = []
 document.addEventListener('keyup', (ev: KeyboardEvent) => {
 	for (let i = 0; i < registeredHotkeys.length; i++) {
 		const hotkey = registeredHotkeys[i];
-		if (ev.code.toLowerCase() === hotkey.code.toLowerCase() && document.activeElement === document.body) hotkey.button.click()
+		const executeHotkey = () => {
+			if (hotkey.constraints.preventDefault === true) { 
+				ev.preventDefault()
+				window.getSelection().removeAllRanges()
+				console.log("prevd", hotkey, hotkey.constraints)
+			}
+			hotkey.button.click()
+			console.log(hotkey)
+		}
+		if (ev.code.toLowerCase() === hotkey.code.toLowerCase() && document.activeElement === document.body) {
+			if (typeof hotkey.constraints !== "undefined" && hotkey.constraints) {
+				if (hotkey.constraints.exclusive) {
+					if (![ev.ctrlKey, ev.shiftKey, ev.altKey].includes(true)) executeHotkey()
+				} else {
+					let valid = true
+					if (hotkey.constraints.ctrlKey && hotkey.constraints.ctrlKey !== ev.ctrlKey) valid = false
+					if (hotkey.constraints.altKey && hotkey.constraints.altKey !== ev.altKey) valid = false
+					if (hotkey.constraints.shiftKey && hotkey.constraints.shiftKey !== ev.shiftKey) valid = false
+					if (valid) executeHotkey()
+				}
+			} else {
+				executeHotkey()
+			}
+		}
 	}
 }, { signal })
 
-function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElement) {
-	registeredHotkeys.push({ code: keycode, button})
+function registerHotkey(keycode: KeyboardEvent['code'], button: HTMLButtonElement, constraints?: HotkeyConstraints) {
+	const htk: Hotkey = { code: keycode, button}
+	if (typeof constraints !== "undefined" && constraints) htk.constraints = constraints
+	registeredHotkeys.push(htk)
 }
 
 export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
@@ -149,11 +174,16 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
 	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
 	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
+
 	window.refreshActiveObjectButton = addButton('refresh', refreshActiveObjectControls, "refresh", { display: 'none' })
+	const selectAllButton = addButton("checklist", () => selectAllInCanvas(canvas), "select all", { display: 'none' })
 	
-	registerHotkey('keya', newRectBtn)
-	registerHotkey('keyd', cloneBtn)
+	registerHotkey('keya', newRectBtn, { exclusive: true })
+	registerHotkey('keyd', cloneBtn, { exclusive: true })
 	registerHotkey('delete', delBtn)
+	registerHotkey('keya', selectAllButton, { ctrlKey: true, preventDefault: true })
+	console.log(registeredHotkeys)
+
 	
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
 		const input = event.target as HTMLInputElement
