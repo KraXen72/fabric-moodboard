@@ -1,9 +1,9 @@
 import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
 import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
-import { createRect, duplicateSelection, readAndAddImage, removeActiveObject, resetViewportTransform } from './canvas';
+import { createRect, duplicateSelection, readAndAddImage as readAndAddImages, removeActiveObject, resetViewportTransform } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
-import { debounce, precisionRound, throttle } from './utils';
+import { precisionRound, throttle } from './utils';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
@@ -18,7 +18,6 @@ function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, e
 	toolbar.appendChild(btn)
 	return btn
 }
-export const materialIconsSvgStyleTag = `<style>@font-face { font-family: 'MaterialSymbolsRounded'; font-style: normal; font-weight: 300; src: url('material-symbols-rounded-thin-specific.woff2') format('woff2'); }</style>`
 
 type Hotkey = { code: KeyboardEvent['code'], button: HTMLButtonElement }
 const registeredHotkeys: Hotkey[] = []
@@ -163,7 +162,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
 		const input = event.target as HTMLInputElement
 		if (input.files.length === 0) return;
-		readAndAddImage(canvas, input.files[0], appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
+		readAndAddImages(canvas, input.files, appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
 	})
 
 	return refreshActiveObjectControls

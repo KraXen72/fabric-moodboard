@@ -61,7 +61,7 @@ body { overflow: hidden; }
 #filereader::after {
 	pointer-events: none;
 	z-index: 2;
-	content: "Pick Image / Drop Image";
+	content: "Pick/Drop Image(s)(max 5)";
 	color: #a3a5aa;
 	border: 2px dashed #a3a5aa;
 	border-radius: 6px;

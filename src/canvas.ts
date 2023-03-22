@@ -4,7 +4,7 @@ import { setup } from "fabricjs-object-fit";
 import { customObjectFitControls } from "./active-object";
 import { GridSnapCanvas } from "./grid-snap-canvas";
 import { clearFileReader } from "./ui-toolbar";
-import { randomNumberBetween } from "./utils";
+import { blobToData, randomNumberBetween } from "./utils";
 
 export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number }
 export type viewportBorders = {
@@ -255,12 +255,11 @@ Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 // credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
 // both further modified by KraXen72
-export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverContain = "cover", cellsSize = 10) {
-	const fileReader = new FileReader();
+export function readAndAddImage(canvas: GridSnapCanvas, files: FileList, mode: coverContain = "cover", cellsSize = 10) {
 
-	fileReader.onload = () => {
-		var imgElement = new Image();
-		imgElement.src = fileReader.result as string;
+	Array.from(files).slice(0, 5).forEach(async (file) => {
+		let imgElement = new Image();
+		imgElement.src = await blobToData(file)
 
 		imgElement.onload = () => {
 
@@ -292,8 +291,7 @@ export function readAndAddImage(canvas: GridSnapCanvas, file: File, mode: coverC
 			canvas.setActiveObject(container)
 			clearFileReader()
 		};
-	};
-	fileReader.readAsDataURL(file);
+	});
 };
 
 /** have to be assignable to image and rect */

@@ -49,6 +49,15 @@ export function randomNumberBetween(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+/** read an image Blob as string data with FileReader API (casts as string) */
+export function blobToData(blob: Blob): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result as string)
+    reader.readAsDataURL(blob)
+  })
+}
+
 // credit: https://stackoverflow.com/questions/41980195/recursive-partialt-in-typescript#51365037
 export type RecursivePartial<T> = {
   [P in keyof T]?:
