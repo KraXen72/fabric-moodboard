@@ -28,7 +28,7 @@ body { overflow: hidden; }
 	padding: 0 !important;
 }
 
-#toolbar, #filereader-wrap {
+.toolbar, #filereader-wrap {
 	min-width: calc(256px - 16px);
 	position: fixed;
 	top: 8px;
@@ -44,6 +44,13 @@ body { overflow: hidden; }
 	padding: 8px;
 	border-radius: 6px;
 }
+
+.toolbar#hidden-toolbar {
+	top: unset;
+	bottom: 8px;
+}
+.toolbar#hidden-toolbar[hidden] { display: none; }
+
 #filereader-wrap {
 	height: calc(8px + 44px + 8px);
 	top: calc(8px + 44px + 8px + 16px);
@@ -79,7 +86,7 @@ body { overflow: hidden; }
 	background-color: hsl(240, 4%, 20%);
 }
 
-#toolbar > button {
+.toolbar > button {
 	width: 44px;
 	height: 44px;
 	border-width: 0px;
@@ -94,10 +101,10 @@ body { overflow: hidden; }
 	justify-content: center;
 	align-items: center;
 }
-#toolbar > button:hover {
+.toolbar > button:hover {
 	background-color: hsl(240, 4%, 25%);
 }
-#toolbar > button:active {
+.toolbar > button:active {
 	background-color: hsl(240, 4%, 30%);
 }
 
@@ -106,8 +113,8 @@ body .tp-dfwv {
 }
 
 /* patch to yoink tweakpanes colors */
-#toolbar, #filereader-wrap { background-color: hsl(230deg, 7%, 17%); }
-#filereader::after, #toolbar > button { background-color: #37383d;}
+.toolbar, #filereader-wrap { background-color: hsl(230deg, 7%, 17%); }
+#filereader::after, .toolbar > button { background-color: #37383d;}
 #filereader::after {
 	color: hsl(230deg, 7%, 75%);
 	border-color: hsl(230deg, 7%, 75%);

@@ -14,13 +14,22 @@ export function updateFileReaderMaxImages() {
 	document.body.style.setProperty("maximages", `${APP_SETTINGS.maxImagesAtOnce}`)
 }
 
-function addButton(materialIcon: string, callback: (this: GlobalEventHandlers, ev: MouseEvent) => any, title?: string, styleOverride?: Record<string, any>) {
+function addButton(
+	materialIcon: string,
+	callback: (this: GlobalEventHandlers, ev: MouseEvent) => any,
+	options?: { title?: string, hidden?: boolean },
+	styleOverride?: Record<string, any>
+) {
 	const btn = document.createElement('button')
 	btn.onclick = callback
 	btn.innerHTML = `<span class="material-symbols-rounded">${materialIcon}</span>`
-	if (title) btn.title = title
 	if (styleOverride) Object.entries(styleOverride).forEach(([ key, value ]) => btn.style[key as any] = value)
-	toolbar.appendChild(btn)
+	if (options?.title && typeof options.title === "string" ) btn.title = options.title
+	if (options?.hidden && options.hidden == true) {
+		document.getElementById("hidden-toolbar").appendChild(btn)
+	}	else {
+		toolbar.appendChild(btn)
+	}
 	return btn
 }
 
@@ -179,12 +188,12 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	topTabs.on('select', (ev) => { if (ev.index === 1) refreshActiveObjectControls() })
 
 	// big buttons' toolbar
-	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, 'Add new rect')
-	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, 'Remove current object or selection')
-	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, 'Duplicate current object or selection')
+	const newRectBtn = addButton('add', () => { canvas.add(createRect(canvas.gridGranularity)) }, {title:'Add new rect'})
+	const delBtn = addButton('delete', () => { removeActiveObject(canvas) }, {title:'Remove current object or selection'})
+	const cloneBtn = addButton('content_copy', () => { duplicateSelection(canvas, appSettings) }, {title:'Duplicate current object or selection'})
 
-	window.refreshActiveObjectButton = addButton('refresh', refreshActiveObjectControls, "refresh", { display: 'none' })
-	const selectAllButton = addButton("checklist", () => selectAllInCanvas(canvas), "select all", { display: 'none' })
+	window.refreshActiveObjectButton = addButton('refresh', refreshActiveObjectControls, {title:"refresh", hidden: true})
+	const selectAllButton = addButton("checklist", () => selectAllInCanvas(canvas), {title:"select all", hidden: true})
 	
 	registerHotkey('keya', newRectBtn, { exclusive: true })
 	registerHotkey('keyd', cloneBtn, { exclusive: true })
