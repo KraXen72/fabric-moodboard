@@ -7,7 +7,7 @@ export function debounce(this: any, func: Function, timeout = 150){
   };
 }
 
-// https://decipher.dev/30-seconds-of-typescript/docs/throttle/
+/** {@link https://decipher.dev/30-seconds-of-typescript/docs/throttle source} */
 export function throttle(fn: Function, wait: number = 300) {
   let inThrottle: boolean,
     lastFn: ReturnType<typeof setTimeout>,
@@ -49,7 +49,10 @@ export function randomNumberBetween(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-/** read an image Blob as string data with FileReader API (casts as string) */
+/** 
+ * read an image Blob as string data with FileReader API (casts as string) 
+ * {@link https://stackoverflow.com/a/63372663/13342359 source}
+ * */
 export function blobToData(blob: Blob): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader()
@@ -58,7 +61,8 @@ export function blobToData(blob: Blob): Promise<string> {
   })
 }
 
-// credit: https://stackoverflow.com/questions/41980195/recursive-partialt-in-typescript#51365037
+
+/** {@link https://stackoverflow.com/a/51365037/13342359 source} */
 export type RecursivePartial<T> = {
   [P in keyof T]?:
     T[P] extends (infer U)[] ? RecursivePartial<U>[] :
