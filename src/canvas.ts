@@ -78,6 +78,8 @@ function AutoTileImages(objects: IObjectFitFull[], canvas: GridSnapCanvas) {
 			row += 1
 		}
 	})
+	canvas.setActiveObject(objects[objects.length - 1])
+	canvas.requestRenderAll()
 }
 
 export function resetViewportTransform(canvas: fabricCanvasExtended) {
@@ -300,39 +302,35 @@ export function readAndAddImages(canvas: GridSnapCanvas, files: FileList, mode: 
 				const vh = imgElement.naturalHeight
 				const imageSize = canvas.gridGranularity * cellsSize
 				const fImg = createImage(imgElement)
-				// scale can be derived from computedDimension / originalDimension
-				
+
+				// saving the computed image width & height so it remembers it's true aspect ratio after we scale it to fit the grid
 				const originalComputedWidth = fImg.width * fImg.scaleX
 				const originalComputedHeight = fImg.height * fImg.scaleY
 
-				if (vw > vh) { //landscape
+				// scale the image so it's bigger dimension is cellSize, and that it is perfectly snapped to grid
+				// scale can be derived from computedDimension / originalDimension
+				if (vw > vh) { // landscape
 					fImg.scaleToWidth(imageSize); // this only changes scaleX, not width
 					const cHeight = fImg.height * fImg.scaleY // computed height (real)
-					const newComputedHeight = snapGrid(cHeight, canvas.gridGranularity) // new height that is rounded to grid cell
+					const newComputedHeight = snapGrid(cHeight, canvas.gridGranularity)
 					fImg.set({ scaleY: newComputedHeight / fImg.height })
-				} else { //portrait
+				} else { // portrait
 					fImg.scaleToHeight(imageSize); // this only changes scaleY, not height
 					const cWidth = fImg.width * fImg.scaleX // computed width (real)
-					const newComputedWidth = snapGrid(cWidth, canvas.gridGranularity) // new width that is rounded to grid cell
+					const newComputedWidth = snapGrid(cWidth, canvas.gridGranularity) 
 					fImg.set({ scaleX: newComputedWidth / fImg.width })
 				}
 				
-				const _objectFit = new ObjectFit(fImg, { mode, enableRecomputeOnScaled: true })
-				const container = _postprocessObject(_objectFit, { cleanup: false, setDefaults: true }) as IObjectFitFull
-
+				const container = _postprocessObject(new ObjectFit(fImg, { mode, enableRecomputeOnScaled: true }), { setDefaults: true }) as IObjectFitFull
 				canvas.add(container);
+				
 				// after scaling & placing image, remember it's dimensions
-				container.set({
-					originalImageDimensions: { width: originalComputedWidth, height: originalComputedHeight }
-				})
+				container.set({ originalImageDimensions: { width: originalComputedWidth, height: originalComputedHeight } })
 				resolve(container)
-				// canvas.setActiveObject(container)
 			};
 		})
 	});
-	Promise.all(_imgContainers).then((containers => {
-		AutoTileImages(containers, canvas)
-	}))
+	Promise.all(_imgContainers).then(containers => AutoTileImages(containers, canvas))
 };
 
 /** have to be assignable to image and rect */

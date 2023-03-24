@@ -36,7 +36,7 @@ declare global {
 	type SmallRange = number & { readonly __rangeType: '(0, 1)' }
 
 	// canvas
-	type postProcessOptions = { cleanup: boolean, setDefaults: boolean }
+	type postProcessOptions = { cleanup?: boolean, setDefaults?: boolean }
 	type selectionShimOrTwin = { top: number, left: number, width: number, height: number, scaleX: number, scaleY: number, [key: string]: any }
 
 	// ui-toolbar
