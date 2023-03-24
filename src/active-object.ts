@@ -71,8 +71,8 @@ export function convertSmallRangeToBig(num: SmallRange, precision = 2): BigRange
 function renderIcon(iconInlineString: string, rotateDeg: number = 0) {
 	const iconSvg = document.createElement("img")
 	iconSvg.src = iconInlineString
-	return function(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, __: fabric.Object) {
-		const size = __.cornerSize;
+	return function(ctx: CanvasRenderingContext2D, left: number, top: number, _: any, obj: fabric.Object) {
+		const size = obj.cornerSize;
 		ctx.save();
 		ctx.translate(left, top);
 		ctx.rotate(fabric.util.degreesToRadians(rotateDeg));

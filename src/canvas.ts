@@ -289,7 +289,7 @@ export function initDotMatrix(canvas: fabricCanvasExtended, size = 32, r = 2) {
 
 Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 
-// credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
+// credit to fileReader => canvas implementation to https://codepen.io/G470/pen/PLbMLL
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
 // both further modified by KraXen72
 export function readAndAddImages(canvas: GridSnapCanvas, files: FileList, mode: coverContain = "cover", cellsSize = 10) {
