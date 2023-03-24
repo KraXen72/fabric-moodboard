@@ -120,4 +120,4 @@ canvas.on("selection:cleared", selectionClearedCallback)
 
 initToolbar(canvas, APP_SETTINGS)
 updateFileReaderMaxImages()
-canvas.add(createRect(GRID_SIZE, { canvas }))
+// canvas.add(createRect(GRID_SIZE, { canvas }))
