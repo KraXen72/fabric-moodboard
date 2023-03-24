@@ -3,8 +3,7 @@ import { ILineOptions } from "fabric/fabric-impl";
 import { setup } from "fabricjs-object-fit";
 import { APP_SETTINGS } from './main';
 import { customObjectFitControls } from "./active-object";
-import { GridSnapCanvas } from "./grid-snap-canvas";
-import { clearFileReader } from "./ui-toolbar";
+import { GridSnapCanvas, snapGrid } from "./grid-snap-canvas";
 import { blobToData, randomNumberBetween } from "./utils";
 
 export type fabricCanvasExtended = (GridSnapCanvas | fabric.Canvas) & { isDragging?: boolean, lastPosX?: number, lastPosY?: number }
@@ -259,7 +258,7 @@ Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 // credit to fileReader implementation to https://codepen.io/G470/pen/PLbMLL
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
 // both further modified by KraXen72
-export function readAndAddImage(canvas: GridSnapCanvas, files: FileList, mode: coverContain = "cover", cellsSize = 10) {
+export function readAndAddImages(canvas: GridSnapCanvas, files: FileList, mode: coverContain = "cover", cellsSize = 10) {
 	Array.from(files).slice(0, APP_SETTINGS.maxImagesAtOnce).forEach(async (file) => {
 		let imgElement = new Image();
 		imgElement.src = await blobToData(file)
@@ -267,21 +266,27 @@ export function readAndAddImage(canvas: GridSnapCanvas, files: FileList, mode: c
 			const vw = imgElement.naturalWidth
 			const vh = imgElement.naturalHeight
 			const imageSize = canvas.gridGranularity * cellsSize
+			const fImg = createImage(imgElement)
+			// scale can be derived from computedDimension / originalDimension
 
-			const fabricImage = createImage(imgElement)
 			if (vw > vh) { //landscape
-				fabricImage.scaleToWidth(imageSize);
-				fabricImage.scaleToHeight(imageSize);
+				fImg.scaleToWidth(imageSize); // this only changes scaleX, not width
+				const cHeight = fImg.height * fImg.scaleY // computed height (real)
+				const newComputedHeight = snapGrid(cHeight, canvas.gridGranularity) // new height that is rounded to grid cell
+				fImg.set({ scaleY: newComputedHeight / fImg.height })
 			} else { //portrait
-				fabricImage.scaleToHeight(imageSize);
-				fabricImage.scaleToWidth(imageSize);
+				fImg.scaleToHeight(imageSize); // this only changes scaleY, not height
+				const cWidth = fImg.width * fImg.scaleX // computed width (real)
+				const newComputedWidth = snapGrid(cWidth, canvas.gridGranularity) // new width that is rounded to grid cell
+				fImg.set({ scaleX: newComputedWidth / fImg.width })
 			}
 			
-			const _objectFit = new ObjectFit(fabricImage, { mode, enableRecomputeOnScaled: true })
+			const _objectFit = new ObjectFit(fImg, { mode, enableRecomputeOnScaled: true })
 			const container = _postprocessObject(_objectFit, { cleanup: false, setDefaults: true }) as IObjectFitFull
 
 			canvas.add(container);
-			canvas.centerObject(container);
+			// canvas.centerObject(container);
+			container.set({ top: canvas.gridGranularity, left: canvas.gridGranularity })
 			canvas.requestRenderAll()
 			container.set({
 				originalImageDimensions: {  // after scaling & placing image, remember it's dimensions
@@ -290,7 +295,6 @@ export function readAndAddImage(canvas: GridSnapCanvas, files: FileList, mode: c
 				}
 			})
 			canvas.setActiveObject(container)
-			clearFileReader()
 		};
 	});
 };
