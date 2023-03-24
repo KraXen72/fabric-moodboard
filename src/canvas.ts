@@ -48,6 +48,38 @@ function getViewportCorners() {
 	})
 }
 
+
+// todo change to class or something so it keeps state of last tiled images
+function AutoTileImages(objects: IObjectFitFull[], canvas: GridSnapCanvas) {
+	const vpt = getViewportCorners()
+	const cellSize = canvas.gridGranularity
+	const gap = cellSize
+
+	let currentY = gap
+	let currentX = gap
+	let rowHeight = Number.NEGATIVE_INFINITY
+	let row = 1
+
+	objects.forEach(object => {
+		const cHeight = object.height * object.scaleY
+		const cWidth = object.width * object.scaleX
+
+		console.log("yielding:", currentX, currentY)
+		object.set({ left: currentX, top: currentY })
+		if (object.handleRecomputeOnScaled) object.handleRecomputeOnScaled()
+
+		if (cHeight > rowHeight) rowHeight = cHeight // found new tallest image
+		currentX += Math.round(cWidth) + gap // shift new image to the right
+
+		if (currentX + cWidth > vpt.tr[0]) { // new row, reset x
+			currentX = gap
+			currentY = (rowHeight + gap) * row
+			rowHeight = Number.NEGATIVE_INFINITY
+			row += 1
+		}
+	})
+}
+
 export function resetViewportTransform(canvas: fabricCanvasExtended) {
 	const vpt = canvas.viewportTransform
 	vpt[4] = 0;
@@ -259,44 +291,48 @@ Object.assign(ObjectFit.prototype.controls, customObjectFitControls())
 // credit to object fit to https://legacybiel.github.io/fabricjs-object-fit/examples/#fit-modes
 // both further modified by KraXen72
 export function readAndAddImages(canvas: GridSnapCanvas, files: FileList, mode: coverContain = "cover", cellsSize = 10) {
-	Array.from(files).slice(0, APP_SETTINGS.maxImagesAtOnce).forEach(async (file) => {
-		let imgElement = new Image();
-		imgElement.src = await blobToData(file)
-		imgElement.onload = () => {
-			const vw = imgElement.naturalWidth
-			const vh = imgElement.naturalHeight
-			const imageSize = canvas.gridGranularity * cellsSize
-			const fImg = createImage(imgElement)
-			// scale can be derived from computedDimension / originalDimension
+	const _imgContainers = Array.from(files).slice(0, APP_SETTINGS.maxImagesAtOnce).map((file) => {
+		return new Promise<IObjectFitFull>(async (resolve) => {
+			let imgElement = new Image();
+			imgElement.src = await blobToData(file)
+			imgElement.onload = () => {
+				const vw = imgElement.naturalWidth
+				const vh = imgElement.naturalHeight
+				const imageSize = canvas.gridGranularity * cellsSize
+				const fImg = createImage(imgElement)
+				// scale can be derived from computedDimension / originalDimension
+				
+				const originalComputedWidth = fImg.width * fImg.scaleX
+				const originalComputedHeight = fImg.height * fImg.scaleY
 
-			if (vw > vh) { //landscape
-				fImg.scaleToWidth(imageSize); // this only changes scaleX, not width
-				const cHeight = fImg.height * fImg.scaleY // computed height (real)
-				const newComputedHeight = snapGrid(cHeight, canvas.gridGranularity) // new height that is rounded to grid cell
-				fImg.set({ scaleY: newComputedHeight / fImg.height })
-			} else { //portrait
-				fImg.scaleToHeight(imageSize); // this only changes scaleY, not height
-				const cWidth = fImg.width * fImg.scaleX // computed width (real)
-				const newComputedWidth = snapGrid(cWidth, canvas.gridGranularity) // new width that is rounded to grid cell
-				fImg.set({ scaleX: newComputedWidth / fImg.width })
-			}
-			
-			const _objectFit = new ObjectFit(fImg, { mode, enableRecomputeOnScaled: true })
-			const container = _postprocessObject(_objectFit, { cleanup: false, setDefaults: true }) as IObjectFitFull
-
-			canvas.add(container);
-			// canvas.centerObject(container);
-			container.set({ top: canvas.gridGranularity, left: canvas.gridGranularity })
-			canvas.requestRenderAll()
-			container.set({
-				originalImageDimensions: {  // after scaling & placing image, remember it's dimensions
-					width: Math.round(container.width * container.scaleX),
-					height: Math.round(container.height * container.scaleY)
+				if (vw > vh) { //landscape
+					fImg.scaleToWidth(imageSize); // this only changes scaleX, not width
+					const cHeight = fImg.height * fImg.scaleY // computed height (real)
+					const newComputedHeight = snapGrid(cHeight, canvas.gridGranularity) // new height that is rounded to grid cell
+					fImg.set({ scaleY: newComputedHeight / fImg.height })
+				} else { //portrait
+					fImg.scaleToHeight(imageSize); // this only changes scaleY, not height
+					const cWidth = fImg.width * fImg.scaleX // computed width (real)
+					const newComputedWidth = snapGrid(cWidth, canvas.gridGranularity) // new width that is rounded to grid cell
+					fImg.set({ scaleX: newComputedWidth / fImg.width })
 				}
-			})
-			canvas.setActiveObject(container)
-		};
+				
+				const _objectFit = new ObjectFit(fImg, { mode, enableRecomputeOnScaled: true })
+				const container = _postprocessObject(_objectFit, { cleanup: false, setDefaults: true }) as IObjectFitFull
+
+				canvas.add(container);
+				// after scaling & placing image, remember it's dimensions
+				container.set({
+					originalImageDimensions: { width: originalComputedWidth, height: originalComputedHeight }
+				})
+				resolve(container)
+				// canvas.setActiveObject(container)
+			};
+		})
 	});
+	Promise.all(_imgContainers).then((containers => {
+		AutoTileImages(containers, canvas)
+	}))
 };
 
 /** have to be assignable to image and rect */
