@@ -4,15 +4,10 @@ import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
-import { APP_SETTINGS } from './main';
 
 const toolbar = document.getElementById("toolbar")
 const hotkeyController = new AbortController()
 const { signal } = hotkeyController
-
-export function updateFileReaderMaxImages() {
-	document.body.style.setProperty("maximages", `${APP_SETTINGS.maxImagesAtOnce}`)
-}
 
 function addButton(
 	materialIcon: string,
@@ -46,18 +41,15 @@ document.addEventListener('keyup', (ev: KeyboardEvent) => {
 			hotkey.button.click()
 		}
 		if (ev.code.toLowerCase() === hotkey.code.toLowerCase() && document.activeElement === document.body) {
-			if (typeof hotkey.constraints !== "undefined" && hotkey.constraints) {
-				if (hotkey.constraints.exclusive) {
-					if (![ev.ctrlKey, ev.shiftKey, ev.altKey].includes(true)) executeHotkey()
-				} else {
-					let valid = true
-					if (hotkey.constraints.ctrlKey && hotkey.constraints.ctrlKey !== ev.ctrlKey) valid = false
-					if (hotkey.constraints.altKey && hotkey.constraints.altKey !== ev.altKey) valid = false
-					if (hotkey.constraints.shiftKey && hotkey.constraints.shiftKey !== ev.shiftKey) valid = false
-					if (valid) executeHotkey()
-				}
+			if (typeof hotkey.constraints === "undefined" || !hotkey.constraints) executeHotkey() // no constraints
+			if (hotkey.constraints.exclusive) {
+				if (![ev.ctrlKey, ev.shiftKey, ev.altKey].includes(true)) executeHotkey()
 			} else {
-				executeHotkey()
+				let valid = true
+				if (hotkey.constraints.ctrlKey && hotkey.constraints.ctrlKey !== ev.ctrlKey) valid = false
+				if (hotkey.constraints.altKey && hotkey.constraints.altKey !== ev.altKey) valid = false
+				if (hotkey.constraints.shiftKey && hotkey.constraints.shiftKey !== ev.shiftKey) valid = false
+				if (valid) executeHotkey()
 			}
 		}
 	}
@@ -97,7 +89,6 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 
 	const imageAddFolder = topTabs.pages[0].addFolder({ title: 'Loading multiple images at once' })
 	imageAddFolder.addInput(appSettings, 'maxImagesAtOnce', { label: 'max', min: 1, max: 20, step: 1 })
-		.on('change', () => updateFileReaderMaxImages())
 	topTabs.pages[0].addSeparator()
 
 	const cloneFolder = topTabs.pages[0].addFolder({ title: 'When duplicating, the new object'})
