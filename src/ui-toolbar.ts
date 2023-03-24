@@ -1,7 +1,7 @@
 import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
 import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
-import { createRect, duplicateSelection, readAndAddImage as readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
+import { createRect, duplicateSelection, readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
 import { APP_SETTINGS } from './main';
@@ -205,13 +205,10 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	document.getElementById('filereader').addEventListener('change', (event: Event) => { 
 		const input = event.target as HTMLInputElement
 		if (input.files.length === 0) return;
-		readAndAddImages(canvas, input.files, appSettings.defaultFitMode, appSettings.defaultImageCellSize) 
+		readAndAddImages(canvas, input.files, appSettings.defaultFitMode, appSettings.defaultImageCellSize);
+		(document.getElementById('filereader') as HTMLInputElement).value = null 
 	})
 
 	return refreshActiveObjectControls
-}
-
-export function clearFileReader() { 
-	(document.getElementById('filereader') as HTMLInputElement).value = null
 }
 
