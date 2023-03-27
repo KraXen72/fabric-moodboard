@@ -41,15 +41,18 @@ document.addEventListener('keyup', (ev: KeyboardEvent) => {
 			hotkey.button.click()
 		}
 		if (ev.code.toLowerCase() === hotkey.code.toLowerCase() && document.activeElement === document.body) {
-			if (typeof hotkey.constraints === "undefined" || !hotkey.constraints) executeHotkey() // no constraints
-			if (hotkey.constraints.exclusive) {
-				if (![ev.ctrlKey, ev.shiftKey, ev.altKey].includes(true)) executeHotkey()
+			if (typeof hotkey.constraints !== "undefined" && hotkey.constraints) {
+				if (hotkey.constraints.exclusive) {
+					if (![ev.ctrlKey, ev.shiftKey, ev.altKey].includes(true)) executeHotkey()
+				} else {
+					let valid = true
+					if (hotkey.constraints.ctrlKey && hotkey.constraints.ctrlKey !== ev.ctrlKey) valid = false
+					if (hotkey.constraints.altKey && hotkey.constraints.altKey !== ev.altKey) valid = false
+					if (hotkey.constraints.shiftKey && hotkey.constraints.shiftKey !== ev.shiftKey) valid = false
+					if (valid) executeHotkey()
+				}
 			} else {
-				let valid = true
-				if (hotkey.constraints.ctrlKey && hotkey.constraints.ctrlKey !== ev.ctrlKey) valid = false
-				if (hotkey.constraints.altKey && hotkey.constraints.altKey !== ev.altKey) valid = false
-				if (hotkey.constraints.shiftKey && hotkey.constraints.shiftKey !== ev.shiftKey) valid = false
-				if (valid) executeHotkey()
+				executeHotkey()
 			}
 		}
 	}

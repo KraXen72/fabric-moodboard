@@ -12,10 +12,10 @@ export function scaleToAspectRatio(canvas: fabricCanvasExtended, adjust: 'width'
 	const _active = canvas.getActiveObject() as IObjectFitFull
 	if (adjust === 'width') {
 		const factor = _active.height / _active.originalImageDimensions.height
-		_active.set({ width: _active.originalImageDimensions.width * factor })
+		_active.set({ scaleX: factor })
 	} else {
 		const factor = _active.width / _active.originalImageDimensions.width
-		_active.set({ height: _active.originalImageDimensions.height * factor })
+		_active.set({ scaleY: factor })
 	}
 	_active.recompute()
 	canvas.requestRenderAll()
