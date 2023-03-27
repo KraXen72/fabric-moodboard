@@ -114,8 +114,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	zoomFolder.addInput(appSettings.zoom, 'zoomOut', { label: 'zoom-out', min: 0.25, max: 1, step: 0.25 })
 	topTabs.pages[0].addSeparator()
 
-	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
-	topTabs.pages[0].addButton({ title: 'Reset', label: 'Zoom' }).on('click', () => { canvas.setZoom(1) });
+	topTabs.pages[0].addButton({ title: 'Focus content (F)', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
+	topTabs.pages[0].addButton({ title: 'Reset (R)', label: 'Zoom' }).on('click', () => { canvas.setZoom(1) });
 
 
 	// current object - tab 1
