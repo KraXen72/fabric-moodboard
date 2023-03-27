@@ -139,17 +139,18 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 			canvas.requestRenderAll()
 		})
 
-		activeImageFolder.addButton({ title: 'Reset original size' }).on("click", () => {
+		activeImageFolder.addButton({ title: 'Scale to true image size' }).on("click", () => {
 			const _active = canvas.getActiveObject() as IObjectFitFull
 			const dims = _active.originalImageDimensions
-			_active.set({ width: dims.width, height: dims.height })
+			_active.set({ width: dims.width, height: dims.height, scaleX: 1, scaleY: 1 })
 			_active.recompute()
 			canvas.requestRenderAll()
 		})
 
 		const staFolder = topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
-		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height") })
-		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width") })
+		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height", appSettings.snapWhenAspectResizing) })
+		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width", appSettings.snapWhenAspectResizing) })
+		staFolder.addInput(appSettings, 'snapWhenAspectResizing', { label: 'snap' })
 
 		const posSeparator = topTabs.pages[1].addSeparator()
 		const granularPositionControls = topTabs.pages[1].addFolder({ title: "Granular Image Position" })

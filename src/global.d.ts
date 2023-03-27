@@ -6,7 +6,9 @@ declare global {
 		defaultFitMode: 'cover' | 'contain',
 		defaultImageCellSize: number,
 		allowResizeSelection: boolean,
-		maxImagesAtOnce: number
+		maxImagesAtOnce: number,
+		/** if true, Snap to Aspect Ratio (Keep Width/Height) buttons will also snap to nearest grid cell */
+		snapWhenAspectResizing: boolean
 	}
 	
 	type scalingEvent = {

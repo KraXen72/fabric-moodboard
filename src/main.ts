@@ -17,7 +17,8 @@ export const APP_SETTINGS: appSettings = {
 	allowResizeSelection: false,
 	defaultFitMode: 'cover',
 	defaultImageCellSize: 10,
-	maxImagesAtOnce: 5
+	maxImagesAtOnce: 5,
+	snapWhenAspectResizing: true
 }
 
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)

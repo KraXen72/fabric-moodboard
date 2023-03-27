@@ -4,21 +4,24 @@ import { fabric } from 'fabric';
 // import { inlineSVGString } from './canvas';
 import upArrow from './icons/upArrow.svg';
 import { precisionRound } from './utils';
+import { GridSnapCanvas, snapGrid } from './grid-snap-canvas';
 // import centerIcon from './icons/alignCenter.svg';
 
 // helper functions for the active object
 
-export function scaleToAspectRatio(canvas: fabricCanvasExtended, adjust: 'width' | 'height') {
+export function scaleToAspectRatio(canvas: GridSnapCanvas, adjust: 'width' | 'height', snapToGrid: boolean) {
 	const _active = canvas.getActiveObject() as IObjectFitFull
 
 	// apparently, user scaling images only changes their width & height, not scaleX and scale Y
 	// to get the factor, we divide current other dimension (* scale, if any) with the original other dimension
 	if (adjust === 'width') {
 		const factor = _active.height * _active.scaleY / _active.originalImageDimensions.height
-		_active.set({ width: _active.originalImageDimensions.width * factor })
+		const width = _active.originalImageDimensions.width * factor
+		_active.set({ width: snapToGrid ? snapGrid(width, canvas.gridGranularity) : width })
 	} else {
 		const factor = _active.width * _active.scaleX / _active.originalImageDimensions.width
-		_active.set({ height: _active.originalImageDimensions.height * factor })
+		const height = _active.originalImageDimensions.height * factor
+		_active.set({ height: snapToGrid ? snapGrid(height, canvas.gridGranularity) : height  })
 	}
 	_active.recompute()
 	canvas.requestRenderAll()

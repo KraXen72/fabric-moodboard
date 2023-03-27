@@ -66,7 +66,7 @@ function AutoTileImages(objects: IObjectFitFull[], canvas: GridSnapCanvas) {
 
 		console.log("yielding:", currentX, currentY)
 		object.set({ left: currentX, top: currentY })
-		if (object.handleRecomputeOnScaled) object.handleRecomputeOnScaled()
+		if (object.recompute) object.recompute()
 
 		if (cHeight > rowHeight) rowHeight = cHeight // found new tallest image
 		currentX += Math.round(cWidth) + gap // shift new image to the right
