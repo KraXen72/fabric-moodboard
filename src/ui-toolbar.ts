@@ -214,6 +214,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 		(document.getElementById('filereader') as HTMLInputElement).value = null 
 	})
 
+
 	return refreshActiveObjectControls
 }
 

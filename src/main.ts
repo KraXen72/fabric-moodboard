@@ -73,6 +73,7 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
   this.isDragging = false;
   this.selection = true;
 });
+// zooming of canvas
 canvas.on('mouse:wheel', function(opt: IEvent<WheelEvent>) {
 	if (APP_SETTINGS.zoom.requireCtrl && !opt.e.ctrlKey) return;
 	if (document.activeElement !== document.body) return;
@@ -130,18 +131,16 @@ function selectionUpdatedCallback() {
 }
 
 function selectionClearedCallback(evt: fabric.IEvent<MouseEvent>) {
-	// recompute all images on deselct if select resize is on
+	// snap and or recompute objects on deselct if select resize is on
 	if (evt.deselected && evt.deselected.length > 1) {
 		evt.deselected.forEach((obj: fabric.Object) => {
 			if (APP_SETTINGS.allowResizeSelection && APP_SETTINGS.autoSnapOnResizeSelection) {
 				const cWidth = precisionRound(obj.width * obj.scaleX)
 				const cHeight = precisionRound(obj.height * obj.scaleY)
-
-				// snap width & height
-				obj.set({ scaleX: 1, scaleY: 1, width: snapGrid(cWidth, canvas.gridGranularity), height: snapGrid(cHeight, canvas.gridGranularity) })
-
-				// snap position
-				obj.set({ top: snapGrid(obj.top, canvas.gridGranularity), left: snapGrid(obj.left, canvas.gridGranularity) })
+				obj.set({ 
+					scaleX: 1, scaleY: 1, width: snapGrid(cWidth, canvas.gridGranularity), height: snapGrid(cHeight, canvas.gridGranularity), /* snap width & height */
+					top: snapGrid(obj.top, canvas.gridGranularity), left: snapGrid(obj.left, canvas.gridGranularity) /* snap position */
+				})
 			}
 			if (obj.type === 'objectFit' && APP_SETTINGS.allowResizeSelection) (obj as IObjectFitFull).handleRecomputeOnScaled()
 		})
