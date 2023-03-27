@@ -10,12 +10,15 @@ import { precisionRound } from './utils';
 
 export function scaleToAspectRatio(canvas: fabricCanvasExtended, adjust: 'width' | 'height') {
 	const _active = canvas.getActiveObject() as IObjectFitFull
+
+	// apparently, user scaling images only changes their width & height, not scaleX and scale Y
+	// to get the factor, we divide current other dimension (* scale, if any) with the original other dimension
 	if (adjust === 'width') {
-		const factor = _active.height / _active.originalImageDimensions.height
-		_active.set({ scaleX: factor })
+		const factor = _active.height * _active.scaleY / _active.originalImageDimensions.height
+		_active.set({ width: _active.originalImageDimensions.width * factor })
 	} else {
-		const factor = _active.width / _active.originalImageDimensions.width
-		_active.set({ scaleY: factor })
+		const factor = _active.width * _active.scaleX / _active.originalImageDimensions.width
+		_active.set({ height: _active.originalImageDimensions.height * factor })
 	}
 	_active.recompute()
 	canvas.requestRenderAll()
