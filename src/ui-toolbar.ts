@@ -101,8 +101,11 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	})
 	topTabs.pages[0].addSeparator()
 
-	const selectionFolder = topTabs.pages[0].addFolder({ title: 'Selection: resize' })
-	selectionFolder.addInput(appSettings, 'allowResizeSelection', { label: 'allow' })
+	const selectionFolder = topTabs.pages[0].addFolder({ title: 'Selection: allow resize' })
+	selectionFolder.addInput(appSettings, 'allowResizeSelection', { label: 'enabled' })
+	const nestSelectionFolder = selectionFolder.addFolder({ title:'auto-snap everything on deselect', expanded: false })
+	nestSelectionFolder.addInput(appSettings, 'autoSnapOnResizeSelection', { label: 'enabled' })
+
 	topTabs.pages[0].addSeparator()
 
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });

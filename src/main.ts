@@ -3,8 +3,8 @@ import './css/style.css'
 
 import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
-import { debounce } from './utils';
-import { GridSnapCanvas } from './grid-snap-canvas';
+import { debounce, precisionRound } from './utils';
+import { GridSnapCanvas, snapGrid } from './grid-snap-canvas';
 import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended } from './canvas';
 import { initToolbar } from './ui-toolbar';
 import { customControls } from './active-object';
@@ -14,11 +14,12 @@ if (GRID_SIZE % 2 !== 0) throw "GRID_SIZE must be an even number"
 
 export const APP_SETTINGS: appSettings = {
 	pasteDirection: 'right',
-	allowResizeSelection: false,
 	defaultFitMode: 'cover',
 	defaultImageCellSize: 10,
 	maxImagesAtOnce: 5,
-	snapWhenProgramaticResizing: true
+	snapWhenProgramaticResizing: true,
+	allowResizeSelection: false,
+	autoSnapOnResizeSelection: true,
 }
 
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
@@ -114,12 +115,23 @@ function selectionUpdatedCallback() {
 
 function selectionClearedCallback(evt: fabric.IEvent<MouseEvent>) {
 	// recompute all images on deselct if select resize is on
-	if (APP_SETTINGS.allowResizeSelection && evt.deselected && evt.deselected.length > 1) {
+	if (evt.deselected && evt.deselected.length > 1) {
 		evt.deselected.forEach((obj: fabric.Object) => {
-			if (obj.type === 'objectFit') (obj as IObjectFitFull).handleRecomputeOnScaled()
+			if (APP_SETTINGS.allowResizeSelection && APP_SETTINGS.autoSnapOnResizeSelection) {
+				const cWidth = precisionRound(obj.width * obj.scaleX)
+				const cHeight = precisionRound(obj.height * obj.scaleY)
+
+				// snap width & height
+				obj.set({ scaleX: 1, scaleY: 1, width: snapGrid(cWidth, canvas.gridGranularity), height: snapGrid(cHeight, canvas.gridGranularity) })
+
+				// snap position
+				obj.set({ top: snapGrid(obj.top, canvas.gridGranularity), left: snapGrid(obj.left, canvas.gridGranularity) })
+			}
+			if (obj.type === 'objectFit' && APP_SETTINGS.allowResizeSelection) (obj as IObjectFitFull).handleRecomputeOnScaled()
 		})
 	}
 	window.refreshActiveObjectButton.click()
+	canvas.requestRenderAll()
 }
 
 canvas.on("selection:created", selectionCallback)

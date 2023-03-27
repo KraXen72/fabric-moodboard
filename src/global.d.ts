@@ -6,6 +6,7 @@ declare global {
 		defaultFitMode: 'cover' | 'contain',
 		defaultImageCellSize: number,
 		allowResizeSelection: boolean,
+		autoSnapOnResizeSelection: boolean,
 		maxImagesAtOnce: number,
 		/** if true, Snap to Aspect Ratio (Keep Width/Height) buttons will also snap to nearest grid cell */
 		snapWhenProgramaticResizing: boolean
