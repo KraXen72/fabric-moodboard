@@ -9,7 +9,12 @@ declare global {
 		autoSnapOnResizeSelection: boolean,
 		maxImagesAtOnce: number,
 		/** if true, Snap to Aspect Ratio (Keep Width/Height) buttons will also snap to nearest grid cell */
-		snapWhenProgramaticResizing: boolean
+		snapWhenProgramaticResizing: boolean,
+		zoom: {
+			requireCtrl: boolean,
+			zoomOut: number,
+			zoomIn: number
+		}
 	}
 	
 	type scalingEvent = {

@@ -20,6 +20,11 @@ export const APP_SETTINGS: appSettings = {
 	snapWhenProgramaticResizing: true,
 	allowResizeSelection: false,
 	autoSnapOnResizeSelection: true,
+	zoom: {
+		requireCtrl: true,
+		zoomOut: 0.75,
+		zoomIn: 1.25
+	}
 }
 
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
@@ -68,6 +73,16 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
   this.isDragging = false;
   this.selection = true;
 });
+canvas.on('mouse:wheel', function(opt: IEvent<WheelEvent>) {
+	if (APP_SETTINGS.zoom.requireCtrl && !opt.e.ctrlKey) return;
+  let zoom = canvas.getZoom();
+  zoom *= 0.999 ** opt.e.deltaY;
+  if (zoom < APP_SETTINGS.zoom.zoomOut) zoom = APP_SETTINGS.zoom.zoomOut;
+  if (zoom > APP_SETTINGS.zoom.zoomIn) zoom = APP_SETTINGS.zoom.zoomIn;
+  canvas.setZoom(zoom);
+  opt.e.preventDefault();
+  opt.e.stopPropagation();
+})
 
 /** show custom controls for Image, hide for Rect */
 function _updateCustomControlsVisiblity(object: fabric.Object) {

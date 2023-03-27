@@ -88,6 +88,10 @@ export function resetViewportTransform(canvas: fabricCanvasExtended) {
 	canvas.requestRenderAll();
 }
 
+export function resetZoom(canvas: fabricCanvasExtended) {
+	canvas.setZoom(1)
+}
+
 const selectAllBlacklist = ['line']
 export function selectAllInCanvas(canvas: fabricCanvasExtended) {
 	canvas.discardActiveObject();

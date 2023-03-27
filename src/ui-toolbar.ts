@@ -90,7 +90,7 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	imageFolder.addInput(appSettings, 'defaultImageCellSize', { label: 'size(cell)', min: 3, max: 20, step: 1 })
 	topTabs.pages[0].addSeparator()
 
-	const imageAddFolder = topTabs.pages[0].addFolder({ title: 'Loading multiple images at once' })
+	const imageAddFolder = imageFolder.addFolder({ title: 'Loading multiple images at once' })
 	imageAddFolder.addInput(appSettings, 'maxImagesAtOnce', { label: 'max', min: 1, max: 20, step: 1 })
 	topTabs.pages[0].addSeparator()
 
@@ -107,8 +107,16 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	nestSelectionFolder.addInput(appSettings, 'autoSnapOnResizeSelection', { label: 'enabled' })
 
 	topTabs.pages[0].addSeparator()
+	
+	const zoomFolder = topTabs.pages[0].addFolder({ title: 'Zoom' })
+	zoomFolder.addInput(appSettings.zoom, 'requireCtrl', { label: 'reqCtrl' })
+	zoomFolder.addInput(appSettings.zoom, 'zoomIn', { label: 'zoom-in', min: 1, max: 2, step: 0.25 })
+	zoomFolder.addInput(appSettings.zoom, 'zoomOut', { label: 'zoom-out', min: 0.25, max: 1, step: 0.25 })
+	topTabs.pages[0].addSeparator()
 
 	topTabs.pages[0].addButton({ title: 'Focus content', label: 'Camera' }).on('click', () => { resetViewportTransform(canvas) });
+	topTabs.pages[0].addButton({ title: 'Reset', label: 'Zoom' }).on('click', () => { canvas.setZoom(1) });
+
 
 	// current object - tab 1
 
