@@ -1,4 +1,4 @@
-import { fabric } from "fabric";
+import { fabric } from 'fabric';
 import { ILineOptions } from "fabric/fabric-impl";
 import { setup } from "fabricjs-object-fit";
 import { APP_SETTINGS } from './main';
@@ -29,6 +29,7 @@ const DEFAULT_RECT_OPTS: fabric.IRectOptions = {
 }
 const DEFAULT_RECT_COLORS = ["f4f1de", "e07a5f", "3d405b", "81b29a", "f2cc8f"]
 
+// TODO fork & overwrite fabric-object-fit to depend on 5.3.0 defs
 const { ObjectFit } = setup(fabric)
 
 const getViewportWidth = () => Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
