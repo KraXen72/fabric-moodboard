@@ -1,11 +1,9 @@
 import { fabricCanvasExtended } from './canvas';
 import { IPosition, IPoint, Point } from 'fabricjs-object-fit';
 import { fabric } from 'fabric';
-// import { inlineSVGString } from './canvas';
 import upArrow from './icons/upArrow.svg';
 import { precisionRound } from './utils';
 import { GridSnapCanvas, snapGrid } from './grid-snap-canvas';
-// import centerIcon from './icons/alignCenter.svg';
 
 // helper functions for the active object
 
@@ -24,6 +22,17 @@ export function scaleToAspectRatio(canvas: GridSnapCanvas, adjust: 'width' | 'he
 		_active.set({ height: snapToGrid ? snapGrid(height, canvas.gridGranularity) : height  })
 	}
 	_active.recompute()
+	canvas.requestRenderAll()
+}
+
+/** scale image to it's original dimensions (possibly snap to grid) */
+export function scaleImageToTrueDims(canvas: GridSnapCanvas, object: IObjectFitFull, snap: boolean) {
+	const dims = snap ? { 
+		width: snapGrid(object.originalImageDimensions.width, canvas.gridGranularity),
+		height: snapGrid(object.originalImageDimensions.height, canvas.gridGranularity),
+	} : object.originalImageDimensions
+	object.set({ ...dims, scaleX: 1, scaleY: 1 })
+	object.recompute()
 	canvas.requestRenderAll()
 }
 

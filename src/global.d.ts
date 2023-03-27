@@ -8,7 +8,7 @@ declare global {
 		allowResizeSelection: boolean,
 		maxImagesAtOnce: number,
 		/** if true, Snap to Aspect Ratio (Keep Width/Height) buttons will also snap to nearest grid cell */
-		snapWhenAspectResizing: boolean
+		snapWhenProgramaticResizing: boolean
 	}
 	
 	type scalingEvent = {
@@ -23,7 +23,7 @@ declare global {
 	type IObjectFitFull = IObjectFit & { 
 		handleRecomputeOnScaled?: Function, 
 		handleRecomputeOnScaling?: Function
-		// added by mev
+		// added by me
 		originalImageDimensions?: {
 			width: number,
 			height: number

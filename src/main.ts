@@ -5,7 +5,7 @@ import { fabric } from "fabric";
 import { IEvent } from 'fabric/fabric-impl';
 import { debounce } from './utils';
 import { GridSnapCanvas } from './grid-snap-canvas';
-import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended, createRect } from './canvas';
+import { resizeCanvas, initDotMatrix, drawViewportBorders, fabricCanvasExtended } from './canvas';
 import { initToolbar } from './ui-toolbar';
 import { customControls } from './active-object';
 
@@ -18,7 +18,7 @@ export const APP_SETTINGS: appSettings = {
 	defaultFitMode: 'cover',
 	defaultImageCellSize: 10,
 	maxImagesAtOnce: 5,
-	snapWhenAspectResizing: true
+	snapWhenProgramaticResizing: true
 }
 
 const canvas = new GridSnapCanvas(document.getElementById("c") as HTMLCanvasElement)
@@ -99,8 +99,9 @@ function selectionUpdatedCallback() {
 	if (!canvas.cfg_snapOnResize) return;
 
 	const selected = canvas.getActiveObjects()
-
 	canvas.discardActiveObject()
+
+	// swap out the fabric's selection for our custom one that can't be resized unless allowed
 	const selection = new fabric.ActiveSelection(selected, { canvas: canvas })
 	if (APP_SETTINGS.allowResizeSelection) {
 		selection.setControlsVisibility(selectionControls)
@@ -111,7 +112,13 @@ function selectionUpdatedCallback() {
 	canvas.requestRenderAll()
 }
 
-function selectionClearedCallback() {
+function selectionClearedCallback(evt: fabric.IEvent<MouseEvent>) {
+	// recompute all images on deselct if select resize is on
+	if (APP_SETTINGS.allowResizeSelection && evt.deselected && evt.deselected.length > 1) {
+		evt.deselected.forEach((obj: fabric.Object) => {
+			if (obj.type === 'objectFit') (obj as IObjectFitFull).handleRecomputeOnScaled()
+		})
+	}
 	window.refreshActiveObjectButton.click()
 }
 

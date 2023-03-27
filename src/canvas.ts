@@ -58,26 +58,23 @@ function AutoTileImages(objects: IObjectFitFull[], canvas: GridSnapCanvas) {
 	let currentY = gap
 	let currentX = gap
 	let rowHeight = Number.NEGATIVE_INFINITY
-	let row = 1
 
 	objects.forEach(object => {
 		const cHeight = object.height * object.scaleY
 		const cWidth = object.width * object.scaleX
+		
+		if (currentX + cWidth > vpt.tr[0]) { // new row, reset x
+			currentX = gap
+			currentY += rowHeight + gap
+			rowHeight = Number.NEGATIVE_INFINITY
+		}
 
-		console.log("yielding:", currentX, currentY)
 		object.set({ left: currentX, top: currentY })
-		if (object.recompute) object.recompute()
 
 		if (cHeight > rowHeight) rowHeight = cHeight // found new tallest image
 		currentX += Math.round(cWidth) + gap // shift new image to the right
-
-		if (currentX + cWidth > vpt.tr[0]) { // new row, reset x
-			currentX = gap
-			currentY = (rowHeight + gap) * row
-			rowHeight = Number.NEGATIVE_INFINITY
-			row += 1
-		}
 	})
+	objects.forEach(o => o.recompute())
 	canvas.setActiveObject(objects[objects.length - 1])
 	canvas.requestRenderAll()
 }

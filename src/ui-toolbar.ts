@@ -2,7 +2,7 @@ import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
 import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
 import { createRect, duplicateSelection, readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
-import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleToAspectRatio, updateActiveObjPos } from './active-object';
+import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleImageToTrueDims, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
 
 const toolbar = document.getElementById("toolbar")
@@ -139,18 +139,15 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 			canvas.requestRenderAll()
 		})
 
-		activeImageFolder.addButton({ title: 'Scale to true image size' }).on("click", () => {
-			const _active = canvas.getActiveObject() as IObjectFitFull
-			const dims = _active.originalImageDimensions
-			_active.set({ width: dims.width, height: dims.height, scaleX: 1, scaleY: 1 })
-			_active.recompute()
-			canvas.requestRenderAll()
-		})
-
 		const staFolder = topTabs.pages[1].addFolder({ title: 'Scale Image to aspect ratio' })
-		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height", appSettings.snapWhenAspectResizing) })
-		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width", appSettings.snapWhenAspectResizing) })
-		staFolder.addInput(appSettings, 'snapWhenAspectResizing', { label: 'snap' })
+		staFolder.addButton({ title: "Keep width" }).on("click", () => { scaleToAspectRatio(canvas, "height", appSettings.snapWhenProgramaticResizing) })
+		staFolder.addButton({ title: "Keep height" }).on("click", () => { scaleToAspectRatio(canvas, "width", appSettings.snapWhenProgramaticResizing) })
+		staFolder.addSeparator()
+		staFolder.addButton({ title: 'Scale to true image size' }).on("click", () => { 
+			scaleImageToTrueDims(canvas, canvas.getActiveObject() as IObjectFitFull, appSettings.snapWhenProgramaticResizing)
+		})
+		staFolder.addSeparator()
+		staFolder.addInput(appSettings, 'snapWhenProgramaticResizing', { label: 'snap' })
 
 		const posSeparator = topTabs.pages[1].addSeparator()
 		const granularPositionControls = topTabs.pages[1].addFolder({ title: "Granular Image Position" })
