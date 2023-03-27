@@ -75,6 +75,7 @@ canvas.on('mouse:up', function(this: fabricCanvasExtended) {
 });
 canvas.on('mouse:wheel', function(opt: IEvent<WheelEvent>) {
 	if (APP_SETTINGS.zoom.requireCtrl && !opt.e.ctrlKey) return;
+	if (document.activeElement !== document.body) return;
   let zoom = canvas.getZoom();
   zoom *= 0.999 ** opt.e.deltaY;
   if (zoom < APP_SETTINGS.zoom.zoomOut) zoom = APP_SETTINGS.zoom.zoomOut;

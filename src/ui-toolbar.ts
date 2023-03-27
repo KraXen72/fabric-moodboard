@@ -1,7 +1,7 @@
 import { IObjectFit, FitMode, IFitMode, Point } from 'fabricjs-object-fit';
 import { Pane, BladeApi, TpChangeEvent } from 'tweakpane';
 import { GridSnapCanvas } from './grid-snap-canvas';
-import { createRect, duplicateSelection, readAndAddImages, removeActiveObject, resetViewportTransform, selectAllInCanvas } from './canvas';
+import { createRect, duplicateSelection, readAndAddImages, removeActiveObject, resetViewportTransform, resetZoom, selectAllInCanvas } from './canvas';
 import { convertBigRangeToSmall, convertSmallRangeToBig, resolvePointToDecimal, scaleImageToTrueDims, scaleToAspectRatio, updateActiveObjPos } from './active-object';
 import { precisionRound, throttle } from './utils';
 
@@ -202,6 +202,8 @@ export function initToolbar(canvas: GridSnapCanvas, appSettings: appSettings ) {
 	registerHotkey('keyd', cloneBtn, { exclusive: true })
 	registerHotkey('delete', delBtn)
 	registerHotkey('keya', selectAllButton, { ctrlKey: true, preventDefault: true })
+	registerHotkey('keyr', addButton('restart_alt', () => resetZoom(canvas), { hidden: true }), { exclusive: true })
+	registerHotkey('keyf', addButton('crop_free', () => resetViewportTransform(canvas), { hidden: true }), { exclusive: true })
 	console.log(registeredHotkeys)
 
 	
